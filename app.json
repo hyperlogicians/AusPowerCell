@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "AusPowerCell",
+    "slug": "auspowercell-valves-control",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.auspowercell.valvescontrol"
+    },
+    "android": {
+      "package": "com.auspowercell.valvescontrol"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "scheme": "auspowercell"
+  }
+}

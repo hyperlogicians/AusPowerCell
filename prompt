@@ -1,0 +1,47 @@
+You are building the frontend of a React Native app using Expo.  
+Use **TailwindCSS with NativeWind** and **shadcn/ui components for React Native** to create modern, smooth, iOS-level UI.  
+Prioritize **tablet-first design** (Samsung tablets), then mobile second.  
+The UI must look polished like Tuya Smart app or iOS Home app, with smooth animations, optimistic updates, and clean layout.  
+The app should use a **light theme** with a **linear gradient background (#516679 → #B3BAC0, top to bottom)** across all pages.  
+Do not generate backend code—only frontend screens, navigation, and components.  
+
+**App Name:** AusPowerCell – Valves Control App  
+
+**Pages to build:**  
+
+1. **Login / Signup Page**  
+   - Clean iOS-style forms  
+   - Gradient background  
+   - Modern shadcn input fields + buttons  
+   - Smooth transitions  
+
+2. **Main Dashboard**  
+   - List of valves with online/offline status  
+   - Show valve details: state, metrics  
+   - Controls: Open / Close / % slider  
+   - Show queued commands (if Wi-Fi drops), with optimistic UI and rollback states  
+   - Alerts (offline, travel timeout, mismatch) displayed as banners/cards  
+   - Local notifications support  
+   - Tablet-optimized grid layout  
+
+3. **Audit Logs Page**  
+   - List of logs: who did what, when, and result  
+   - Timeline-style UI with shadcn components  
+
+4. **Users Page**  
+   - Show users, last login time, and activity  
+   - Card-based layout, iOS look  
+
+5. **Settings Page**  
+   - Units, Quiet Hours, etc.  
+   - No internet required  
+   - Switches, toggles, and segmented controls styled like iOS  
+
+**Additional requirements:**  
+- Use **Expo Router** for navigation.  
+- Keep the code modular with reusable UI components (e.g., ValveCard, AlertBanner, LogItem).  
+- Add smooth transitions/animations (Framer Motion for React Native or Reanimated).  
+- Ensure everything matches modern iOS UX patterns, with accessibility in mind.  
+- Optimize layouts for tablets first, but responsive to mobile.  
+
+Generate all pages, navigation, and reusable components in a clean project structure.  
