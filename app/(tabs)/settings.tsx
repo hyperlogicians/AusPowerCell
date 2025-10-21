@@ -63,85 +63,58 @@ export default function Settings() {
   };
 
   const renderAccountView = () => (
-    <View className="flex-1">
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
       {/* Profile Section - Centered */}
       <View className="items-center mb-12">
         <View className={cn(
-          "rounded-full bg-[#A8D5DB] items-center justify-center mb-4 border border-[#6B9CA3]",
+          "rounded-full bg-[#BBDDE4] items-center justify-center mb-4 border border-[#8dbfc9]",
           isLargeTablet ? "w-40 h-40" : isTablet ? "w-36 h-36" : "w-32 h-32"
         )}>
-          <User 
-            size={isLargeTablet ? 80 : isTablet ? 72 : 64} 
-            color="#2d3748" 
-            strokeWidth={1.5} 
+          <User
+            size={isLargeTablet ? 84 : isTablet ? 76 : 64}
+            color="#0f172a"
+            strokeWidth={1.4}
           />
           <View className={cn(
-            "absolute bg-white rounded-lg items-center justify-center border border-[#A8D5DB] shadow-sm",
-            isLargeTablet ? "-bottom-1 -right-1 w-10 h-10" : isTablet ? "-bottom-1 -right-1 w-9 h-9" : "-bottom-1 -right-1 w-8 h-8"
+            "absolute bg-white rounded-full items-center justify-center border border-[#8dbfc9] shadow",
+            "-bottom-3 -right-3",
+            isLargeTablet ? "w-12 h-12" : isTablet ? "w-11 h-11" : "w-10 h-10"
           )}>
-            <Camera 
-              size={isLargeTablet ? 20 : isTablet ? 18 : 16} 
-              color="#64748b" 
-            />
+            <Camera size={isLargeTablet ? 22 : isTablet ? 20 : 18} color="#0f172a" />
           </View>
         </View>
         <Text className={cn(
-          "font-bold mb-2",
-          isLargeTablet ? "text-[#1f2937] text-3xl" : isTablet ? "text-[#1f2937] text-2xl" : "text-[#1f2937] text-2xl"
-        )}>AUS</Text>
+          "font-bold text-[#0f172a]",
+          isLargeTablet ? "text-3xl" : isTablet ? "text-2xl" : "text-2xl"
+        )}>John L.</Text>
         <Text className={cn(
           "text-[#64748b]",
           isLargeTablet ? "text-lg" : isTablet ? "text-base" : "text-base"
-        )}>admin@auspowercell.com</Text>
+        )}>johnlegend@auspowercell.com</Text>
       </View>
 
       {/* Edit Profile Section - Left Aligned */}
-      <View className="mb-8">
-        <Text className={cn(
-          "font-semibold mb-4",
-          isLargeTablet ? "text-[#1f2937] text-xl" : isTablet ? "text-[#1f2937] text-lg" : "text-[#1f2937] text-lg"
-        )}>Edit Profile</Text>
-        <Text className={cn(
-          "font-medium mb-3",
-          isLargeTablet ? "text-[#1f2937] text-base" : isTablet ? "text-[#1f2937] text-sm" : "text-[#1f2937] text-sm"
-        )}>Display Name</Text>
-        <View className={cn(
-          isLargeTablet ? "w-[500px]" : isTablet ? "w-[400px]" : "w-96"
-        )}>
-          <TextInput
-            value={displayName}
-            onChangeText={setDisplayName}
-            className={cn(
-              "bg-[#C5E5EA] border border-[#A8D5DB] rounded-2xl px-4 text-[#1f2937]",
-              isLargeTablet ? "py-4 text-lg" : isTablet ? "py-3 text-base" : "py-3 text-base"
-            )}
-            placeholderTextColor="#94a3b8"
-          />
-        </View>
+      <View className={cn("mb-12", isLargeTablet ? "w-[540px]" : isTablet ? "w-[440px]" : "w-96")}> 
+        <Text className="text-[#94a3b8] font-semibold text-lg mb-4">Edit Profile</Text>
+        <Text className="text-[#0f172a] font-semibold mb-2">Display Name</Text>
+        <TextInput
+          value={displayName}
+          onChangeText={setDisplayName}
+          className="bg-[#BBDDE4] border border-[#8dbfc9] rounded-2xl px-4 py-3 text-[#0f172a] text-base"
+          placeholderTextColor="#0f172a99"
+        />
       </View>
 
-      {/* Action Buttons - Bottom Right */}
-      <View className="flex-row justify-end space-x-4 mt-auto">
-        <Pressable className={cn(
-          "bg-[#A8D5DB] rounded-2xl",
-          isLargeTablet ? "px-8 py-4" : isTablet ? "px-7 py-3" : "px-6 py-3"
-        )}>
-          <Text className={cn(
-            "font-medium",
-            isLargeTablet ? "text-[#1f2937] text-lg" : isTablet ? "text-[#1f2937] text-base" : "text-[#1f2937] text-base"
-          )}>Change Password</Text>
+      {/* Action Buttons - Inside Container, Right Aligned */}
+      <View className="flex-row justify-end space-x-4 mb-6">
+        <Pressable className="bg-[#BBDDE4] rounded-2xl px-8 py-3 shadow-sm">
+          <Text className="text-[#0f172a] text-base font-semibold">Change Password</Text>
         </Pressable>
-        <Pressable className={cn(
-          "bg-[#D1D5DB] rounded-2xl",
-          isLargeTablet ? "px-8 py-4" : isTablet ? "px-7 py-3" : "px-6 py-3"
-        )}>
-          <Text className={cn(
-            "font-medium",
-            isLargeTablet ? "text-[#6b7280] text-lg" : isTablet ? "text-[#6b7280] text-base" : "text-[#6b7280] text-base"
-          )}>Save Edits</Text>
+        <Pressable className="bg-[#d6dde4] rounded-2xl px-8 py-3 shadow-sm">
+          <Text className="text-[#4b5563] text-base font-semibold">Save Edits</Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 
   const renderDevicesView = () => (
@@ -237,7 +210,7 @@ export default function Settings() {
           />
         </View>
       </View>
-
+      
       <View className={cn(
         isLargeTablet ? "mb-8" : isTablet ? "mb-6" : "mb-6"
       )}>
@@ -281,7 +254,7 @@ export default function Settings() {
               isLargeTablet ? "text-[#64748b] text-lg" : isTablet ? "text-[#64748b] text-base" : "text-[#64748b] text-base"
             )}>Configure system preferences and parameters</Text>
           </View>
-
+          
           <View className="space-y-3">
             <Pressable
               onPress={() => setSelectedView('account')}
@@ -319,7 +292,7 @@ export default function Settings() {
               )}>Device Management</Text>
             </Pressable>
 
-            <Pressable
+            <Pressable 
               onPress={() => setSelectedView('notifications')}
               className={cn(
                 'flex-row items-center rounded-2xl',
