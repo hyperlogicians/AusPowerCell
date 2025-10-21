@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Pressable, useWindowDimensions, Platform, Image } from 'react-native';
+import { View, Pressable, useWindowDimensions, Platform } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { cn } from '../../lib/utils';
 import * as Haptics from 'expo-haptics';
-import { House, ClipboardClock , Settings as SettingsLucide, UsersRound } from 'lucide-react-native';
-
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import {
+  BreastPumpIcon,
+  Audit01Icon,
+  UserMultipleIcon,
+  Settings01Icon,
+} from '@hugeicons/core-free-icons';
 
 interface SidebarItem {
   key: string;
@@ -19,13 +24,14 @@ interface SidebarProps {
   onToggle?: () => void;
 }
 
-// Lucide-based icons for sidebar
-function IconWrapper({ focused, children }: { focused: boolean; children: React.ReactNode }) {
-  return (
-    <View className={`items-center justify-center ${focused ? 'opacity-100' : 'opacity-70'}`}>
-      {children}
-    </View>
-  );
+function IconWrapper({
+  focused,
+  children,
+}: {
+  focused: boolean;
+  children: React.ReactNode;
+}) {
+  return <View className="items-center justify-center">{children}</View>;
 }
 
 export function Sidebar({ items }: SidebarProps) {
@@ -33,7 +39,8 @@ export function Sidebar({ items }: SidebarProps) {
   const pathname = usePathname();
   const { width } = useWindowDimensions();
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  
+  const [pressedKey, setPressedKey] = useState<string | null>(null);
+
   const isTablet = width >= 768;
   const sidebarWidth = isTablet ? 100 : 88;
 
@@ -44,75 +51,85 @@ export function Sidebar({ items }: SidebarProps) {
     router.push(item.route as any);
   };
 
-  const handleToggle = () => {};
-
   return (
-    <View 
-      className="bg-transparent border-r border-white/0"
-      style={{ width: sidebarWidth }}
-    >
-      {/* Header */}
-      <View className="px-6 py-10">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1">
-            <View className="flex-row items-center mb-3">
-              <Image
-                source={Platform.OS === 'web' ? { uri: '/logo.png' } : require('../assets/logo.png')}
-                className="h-8 w-40"
-                resizeMode="contain"
-              />
-            </View>
-          </View>
-        </View>
-      </View>
-
+    <View style={{ width: sidebarWidth }}>
       {/* Navigation Items */}
-      <View className="flex-1 px-6 py-8">
-        <View className="space-y-3">
+      <View className="flex-1 px-6 py-8 items-center">
+        <View className="gap-14">
           {items.map((item) => {
-            const isRouteActive = item.route === '/(tabs)'
-              ? pathname === '/(tabs)'
-              : pathname.startsWith(item.route);
+            const isRouteActive =
+              item.route === '/(tabs)'
+                ? pathname === '/(tabs)'
+                : pathname.startsWith(item.route);
             const isHovered = hoveredKey === item.key;
-            const isActive = isRouteActive || isHovered;
-            
+
+            const ACTIVE_BG = 'rgba(255,255,255,0.20)';
+            const PRESSED_BG = 'rgba(255,255,255,0.15)';
+            const HOVER_BG = 'rgba(255,255,255,0.10)';
+            const TRANSPARENT = 'transparent';
+
             return (
               <Pressable
                 key={item.key}
                 onPress={() => handleItemPress(item)}
-                onHoverIn={() => setHoveredKey(item.key)}
-                onHoverOut={() => setHoveredKey(null)}
+                onPressIn={() => setPressedKey(item.key)}
+                onPressOut={() => setPressedKey(null)}
+                {...(Platform.OS === 'web'
+                  ? {
+                      onHoverIn: () => setHoveredKey(item.key),
+                      onHoverOut: () => setHoveredKey(null),
+                    }
+                  : {})}
+                style={({ pressed }) => {
+                  const bgColor = isRouteActive
+                    ? ACTIVE_BG
+                    : pressed
+                    ? PRESSED_BG
+                    : isHovered
+                    ? HOVER_BG
+                    : TRANSPARENT;
+
+                  return {
+                    backgroundColor: bgColor,
+                    borderRadius: 16,
+                  };
+                }}
                 className={cn(
-                  'flex-row items-center px-4 py-4 rounded-2xl transition-all duration-200',
-                  isActive ? 'bg-white/10 border border-white/20 shadow-lg shadow-black/10' : 'bg-transparent'
+                  'flex-row items-center justify-center px-4 py-4 rounded-2xl transition-all duration-200'
                 )}
               >
-                <View className="mr-0">
-                  {
-                    item.key === 'dashboard' ? (
-                      <IconWrapper focused={isActive}>
-                        <House size={22} color={isActive ? 'white' : 'rgba(255,255,255,0.7)'} />
-                      </IconWrapper>
-                    ) : item.key === 'audit-logs' ? (
-                      <IconWrapper focused={isActive}>
-                        <ClipboardClock size={22} color={isActive ? 'white' : 'rgba(255,255,255,0.7)'} />
-                      </IconWrapper>
-                    ) : item.key === 'users' ? (
-                      <IconWrapper focused={isActive}>
-                        <UsersRound size={22} color={isActive ? 'white' : 'rgba(255,255,255,0.7)'} />
-                      </IconWrapper>
-                    ) : (
-                      <IconWrapper focused={isActive}>
-                        <SettingsLucide size={22} color={isActive ? 'white' : 'rgba(255,255,255,0.7)'} />
-                      </IconWrapper>
-                    )
-                  }
-                </View>
-                
-                
-                
+                <IconWrapper focused={isRouteActive}>
+                  {item.key === 'dashboard' ? (
+                    <View className="rotate-180">
+                      <HugeiconsIcon
+                        icon={BreastPumpIcon}
+                        size={28}
+                        color="white"
+                      />
+                    </View>
+                  ) : item.key === 'audit-logs' ? (
+                    <HugeiconsIcon
+                      icon={Audit01Icon}
+                      size={28}
+                      color="white"
+                    />
+                  ) : item.key === 'users' ? (
+                    <HugeiconsIcon
+                      icon={UserMultipleIcon}
+                      size={28}
+                      color="white"
+                    />
+                  ) : (
+                    <HugeiconsIcon
+                      icon={Settings01Icon}
+                      size={28}
+                      color="white"
+                    />
+                  )}
+                </IconWrapper>
+
                 {isRouteActive && (
-                  <View className="w-2 h-2 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50" />
+                  <View className="w-2 h-2 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 ml-2" />
                 )}
               </Pressable>
             );
@@ -126,30 +143,30 @@ export function Sidebar({ items }: SidebarProps) {
   );
 }
 
-// Export the sidebar items configuration
+// Sidebar Items Configuration
 export const sidebarItems: SidebarItem[] = [
   {
     key: 'dashboard',
     label: 'Dashboard',
-    icon: House,
+    icon: BreastPumpIcon,
     route: '/(tabs)',
   },
   {
     key: 'audit-logs',
     label: 'Audit Logs',
-    icon: ClipboardClock,
+    icon: Audit01Icon,
     route: '/(tabs)/audit-logs',
   },
   {
     key: 'users',
     label: 'Users',
-    icon: UsersRound,
+    icon: UserMultipleIcon,
     route: '/(tabs)/users',
   },
   {
     key: 'settings',
     label: 'Settings',
-    icon: SettingsLucide,
+    icon: Settings01Icon,
     route: '/(tabs)/settings',
   },
 ];

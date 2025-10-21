@@ -62,17 +62,22 @@ export function TopBar() {
   return (
     <View className="px-6 pt-6 pb-4 flex-row items-center justify-between bg-transparent">
       {/* Left: Logo + Title */}
-      <View className="flex-row items-center">
-        <Text className="text-white text-2xl font-light tracking-wide">
-          {title}
+      <View className="flex-row items-center justify-center ml-2">
+        <Image
+          source={require('../../public/apclogo.png')}
+          className="h-10 w-10 mr-3"
+          resizeMode="contain"
+        />
+        <Text className="text-white text-2xl mb-1 font-regular">
+          AusPowerCell
         </Text>
       </View>
 
       {/* Right: Actions */}
-      <View className="flex-row items-center">
+      <View className="flex-row items-center space-x-5">
         {/* Connection + Status */}
-        <View className="flex-row items-center mr-3">
-          <View className="items-center mr-4">
+        <View className="flex-row mr-3 space-x-10">
+          <View>
             <SignalHigh
               size={16}
               color={
@@ -82,13 +87,14 @@ export function TopBar() {
                   ? "#f59e0b"
                   : "#ef4444"
               }
+              className="w-full justify-start"
             />
             <Text className="text-white/90 text-sm leading-4 capitalize">
               {statusStore.systemHealth}
             </Text>
             <Text className="text-white/60 text-[10px]">Status</Text>
           </View>
-          <View className="items-center mr-2">
+          <View>
             <Wifi size={16} color="#34d399" />
             <Text className="text-white/90 text-sm leading-4">
               {statusStore.wifiName || "Wi‑Fi"}
@@ -98,15 +104,15 @@ export function TopBar() {
         </View>
         <Pressable
           onPress={buzz}
-          className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 items-center justify-center mr-3 hover:bg-white/12"
+          className="w-10 h-10 rounded-xl items-center justify-center mr-3 hover:bg-white/12"
           aria-label="Notifications"
         >
           <View className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-2 right-2" />
           <Bell size={18} color="#ffffff" />
         </Pressable>
         <Pressable onPress={buzz} className="flex-row items-center">
-          <View className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 items-center justify-center">
-            <UserRound size={18} color="#ffffff" />
+          <View className="w-10 h-10 rounded-full bg-blue-100 border border-[#4B4B4B] items-center justify-center">
+            <UserRound size={18} color="#4B4B4B" />
           </View>
         </Pressable>
       </View>

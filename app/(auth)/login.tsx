@@ -105,7 +105,7 @@ export default function LoginScreen() {
                     <div className="flex flex-col">
                       <Input
                         label="Email Address"
-                        placeholder="Enter your email"
+                        placeholder="john@apc.com"
                         value={email}
                         onChangeText={setEmail}
                         keyboardType="email-address"
@@ -116,7 +116,7 @@ export default function LoginScreen() {
                       
                       <Input
                         label="Password"
-                        placeholder="Enter your password"
+                        placeholder="Password"
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
