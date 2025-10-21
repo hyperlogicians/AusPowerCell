@@ -63,50 +63,52 @@ export default function Settings() {
   };
 
   const renderAccountView = () => (
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-      {/* Profile Section - Centered */}
-      <View className="items-center mb-12">
-        <View className={cn(
-          "rounded-full bg-[#BBDDE4] items-center justify-center mb-4 border border-[#8dbfc9]",
-          isLargeTablet ? "w-40 h-40" : isTablet ? "w-36 h-36" : "w-32 h-32"
-        )}>
-          <User
-            size={isLargeTablet ? 84 : isTablet ? 76 : 64}
-            color="#0f172a"
-            strokeWidth={1.4}
-          />
+    <View className="flex-1 justify-between">
+      <View>
+        {/* Profile Section - Centered */}
+        <View className="items-center mb-8">
           <View className={cn(
-            "absolute bg-white rounded-full items-center justify-center border border-[#8dbfc9] shadow",
-            "-bottom-3 -right-3",
-            isLargeTablet ? "w-12 h-12" : isTablet ? "w-11 h-11" : "w-10 h-10"
+            "rounded-full bg-[#BBDDE4] items-center justify-center mb-3 border border-[#8dbfc9]",
+            isLargeTablet ? "w-32 h-32" : isTablet ? "w-28 h-28" : "w-24 h-24"
           )}>
-            <Camera size={isLargeTablet ? 22 : isTablet ? 20 : 18} color="#0f172a" />
+            <User
+              size={isLargeTablet ? 68 : isTablet ? 60 : 52}
+              color="#0f172a"
+              strokeWidth={1.4}
+            />
+            <View className={cn(
+              "absolute bg-white rounded-full items-center justify-center border border-[#8dbfc9] shadow",
+              "-bottom-2 -right-2",
+              isLargeTablet ? "w-10 h-10" : isTablet ? "w-9 h-9" : "w-8 h-8"
+            )}>
+              <Camera size={isLargeTablet ? 18 : isTablet ? 16 : 14} color="#0f172a" />
+            </View>
           </View>
+          <Text className={cn(
+            "font-bold text-[#0f172a]",
+            isLargeTablet ? "text-2xl" : isTablet ? "text-xl" : "text-xl"
+          )}>John L.</Text>
+          <Text className={cn(
+            "text-[#64748b]",
+            isLargeTablet ? "text-base" : isTablet ? "text-sm" : "text-sm"
+          )}>johnlegend@auspowercell.com</Text>
         </View>
-        <Text className={cn(
-          "font-bold text-[#0f172a]",
-          isLargeTablet ? "text-3xl" : isTablet ? "text-2xl" : "text-2xl"
-        )}>John L.</Text>
-        <Text className={cn(
-          "text-[#64748b]",
-          isLargeTablet ? "text-lg" : isTablet ? "text-base" : "text-base"
-        )}>johnlegend@auspowercell.com</Text>
-      </View>
 
-      {/* Edit Profile Section - Left Aligned */}
-      <View className={cn("mb-12", isLargeTablet ? "w-[540px]" : isTablet ? "w-[440px]" : "w-96")}> 
-        <Text className="text-[#94a3b8] font-semibold text-lg mb-4">Edit Profile</Text>
-        <Text className="text-[#0f172a] font-semibold mb-2">Display Name</Text>
-        <TextInput
-          value={displayName}
-          onChangeText={setDisplayName}
-          className="bg-[#BBDDE4] border border-[#8dbfc9] rounded-2xl px-4 py-3 text-[#0f172a] text-base"
-          placeholderTextColor="#0f172a99"
-        />
+        {/* Edit Profile Section - Left Aligned */}
+        <View className={cn("mb-6", isLargeTablet ? "w-[480px]" : isTablet ? "w-[400px]" : "w-80")}> 
+          <Text className="text-[#94a3b8] font-semibold text-base mb-3">Edit Profile</Text>
+          <Text className="text-[#0f172a] font-semibold mb-2 text-sm">Display Name</Text>
+          <TextInput
+            value={displayName}
+            onChangeText={setDisplayName}
+            className="bg-[#BBDDE4] border border-[#8dbfc9] rounded-2xl px-4 py-3 text-[#0f172a] text-base"
+            placeholderTextColor="#0f172a99"
+          />
+        </View>
       </View>
 
       {/* Action Buttons - Inside Container, Right Aligned */}
-      <View className="flex-row justify-end space-x-4 mb-6">
+      <View className="flex-row justify-end space-x-4">
         <Pressable className="bg-[#BBDDE4] rounded-2xl px-8 py-3 shadow-sm">
           <Text className="text-[#0f172a] text-base font-semibold">Change Password</Text>
         </Pressable>
@@ -114,7 +116,7 @@ export default function Settings() {
           <Text className="text-[#4b5563] text-base font-semibold">Save Edits</Text>
         </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 
   const renderDevicesView = () => (
