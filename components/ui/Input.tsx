@@ -12,9 +12,9 @@ interface InputProps extends TextInputProps {
 export const Input = forwardRef<TextInput, InputProps>(
   ({ label, error, leftIcon, rightIcon, className, ...props }, ref) => {
     return (
-      <View className="w-full">
+      <View className="border border-black/20 bg-black/10 rounded-3xl p-px mb-3">
         {label && (
-          <Text className="text-white/80 text-sm font-medium mb-2 ml-1">
+          <Text className="text-blue-300 text-sm font-medium mt-3 ml-3">
             {label}
           </Text>
         )}
@@ -27,13 +27,20 @@ export const Input = forwardRef<TextInput, InputProps>(
           <TextInput
             ref={ref}
             className={cn(
-              'bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/50 text-base min-h-[44px]',
+              'px-4 pb-1 text-white placeholder:text-white text-base min-h-[44px]',
               leftIcon && 'pl-12',
               rightIcon && 'pr-12',
               error && 'border-red-400',
               className
             )}
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            underlineColorAndroid="transparent"
+            selectionColor="transparent"
+            style={{
+              borderWidth: 0,
+              outline: 'none',
+              boxShadow: 'none',
+            }}
             {...props}
           />
           {rightIcon && (
