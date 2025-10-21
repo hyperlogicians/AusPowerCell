@@ -30,6 +30,12 @@ module.exports = {
         }
       },
       fontFamily: {
+        'sans': ['Poppins-Regular', 'system-ui', 'sans-serif'],
+        'light': ['Poppins-Light', 'system-ui', 'sans-serif'],
+        'normal': ['Poppins-Regular', 'system-ui', 'sans-serif'],
+        'medium': ['Poppins-Medium', 'system-ui', 'sans-serif'],
+        'semibold': ['Poppins-SemiBold', 'system-ui', 'sans-serif'],
+        'bold': ['Poppins-Bold', 'system-ui', 'sans-serif'],
         'sf-pro': ['SF Pro Display', 'system-ui', 'sans-serif'],
         'sf-pro-text': ['SF Pro Text', 'system-ui', 'sans-serif'],
       }

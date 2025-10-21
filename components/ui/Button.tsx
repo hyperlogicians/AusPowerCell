@@ -21,7 +21,7 @@ export function Button({
   const baseClasses = 'rounded-xl items-center justify-center flex-row';
   
   const variantClasses = {
-    default: 'bg-blue-500 shadow-lg shadow-blue-500/30',
+    default: 'bg-[#E5FCFE] shadow-lg shadow-blue-500/30',
     secondary: 'bg-white/10 backdrop-blur-sm border border-white/20',
     outline: 'border-2 border-white/30 bg-transparent',
     ghost: 'bg-transparent',
@@ -59,7 +59,8 @@ export function Button({
           className={cn(
             'font-semibold text-white text-center',
             textSizeClasses[size],
-            variant === 'outline' && 'text-white/90'
+            variant === 'outline' && 'text-white/90',
+            variant === 'default' && 'text-black/80 font-medium'
           )}
         >
           {children}
