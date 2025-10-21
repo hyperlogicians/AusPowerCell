@@ -61,26 +61,28 @@ export default function Settings() {
     <View className="flex-1">
       {/* Profile Section - Centered */}
       <View className="items-center mb-12">
-        <View className="w-24 h-24 rounded-full bg-[#A8D5DB] items-center justify-center mb-4 border border-[#6B9CA3]">
-          <User size={48} color="#2d3748" strokeWidth={1.5} />
+        <View className="w-32 h-32 rounded-full bg-[#A8D5DB] items-center justify-center mb-4 border border-[#6B9CA3]">
+          <User size={64} color="#2d3748" strokeWidth={1.5} />
           <View className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-lg items-center justify-center border border-[#A8D5DB] shadow-sm">
             <Camera size={16} color="#64748b" />
           </View>
         </View>
-        <Text className="text-[#1f2937] text-2xl font-bold mb-2">John L.</Text>
-        <Text className="text-[#64748b] text-base">johnlegend@auspowercell.com</Text>
+        <Text className="text-[#1f2937] text-2xl font-bold mb-2">AUS</Text>
+        <Text className="text-[#64748b] text-base">admin@auspowercell.com</Text>
       </View>
 
       {/* Edit Profile Section - Left Aligned */}
       <View className="mb-8">
         <Text className="text-[#1f2937] text-lg font-semibold mb-4">Edit Profile</Text>
         <Text className="text-[#1f2937] text-sm font-medium mb-3">Display Name</Text>
-        <TextInput
-          value={displayName}
-          onChangeText={setDisplayName}
-          className="bg-[#C5E5EA] border border-[#A8D5DB] rounded-2xl px-4 py-4 text-[#1f2937] text-base"
-          placeholderTextColor="#94a3b8"
-        />
+        <View className="w-96">
+          <TextInput
+            value={displayName}
+            onChangeText={setDisplayName}
+            className="bg-[#C5E5EA] border border-[#A8D5DB] rounded-2xl px-4 py-3 text-[#1f2937] text-base"
+            placeholderTextColor="#94a3b8"
+          />
+        </View>
       </View>
 
       {/* Action Buttons - Bottom Right */}
@@ -166,7 +168,7 @@ export default function Settings() {
     <SafeAreaView className="flex-1 bg-[#f9fafb]" edges={['top']}>
       <View className="flex-1 flex-row">
         {/* Sidebar */}
-        <View className="w-[320px] bg-[#f3f4f6] rounded-tr-3xl rounded-br-3xl px-8 pt-8">
+        <View className="w-[320px] bg-white rounded-2xl mx-8 my-8 px-8 pt-8 shadow-sm">
           <View className="mb-10">
             <Text className="text-[#1f2937] text-3xl font-bold mb-3">Settings</Text>
             <Text className="text-[#64748b] text-base">Configure system preferences and parameters</Text>
@@ -205,16 +207,6 @@ export default function Settings() {
               <Bell size={20} color="#2d3748" />
               <Text className="text-[#2d3748] text-base font-medium ml-3">Notification</Text>
             </Pressable>
-          </View>
-
-          {/* Additional icons at bottom */}
-          <View className="mt-12 space-y-4">
-            <View className="w-8 h-8 items-center justify-center">
-              <User size={20} color="#9ca3af" />
-            </View>
-            <View className="w-8 h-8 items-center justify-center">
-              <SettingsIcon size={20} color="#9ca3af" />
-            </View>
           </View>
         </View>
 
