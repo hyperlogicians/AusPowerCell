@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
+import { ValveCard, Valve } from "../../components/ValveCard";
 import { cn } from "../../lib/utils";
 import * as Haptics from "expo-haptics";
 import {
@@ -49,6 +50,8 @@ interface ValveData {
   hasAlert?: boolean;
   percentage?: number;
   lastSetpoint?: number;
+  location?: string;
+  flowRate?: number;
 }
 
 const initialValves: ValveData[] = [
@@ -63,6 +66,8 @@ const initialValves: ValveData[] = [
     lastSetpoint: 50,
     lastUpdate: new Date(),
     hasAlert: false,
+    location: "North Side, Sector 1",
+    flowRate: 0,
   },
   {
     id: "2",
@@ -75,6 +80,8 @@ const initialValves: ValveData[] = [
     lastSetpoint: 40,
     lastUpdate: new Date(),
     hasAlert: false,
+    location: "Ground, Sector 12",
+    flowRate: 62,
   },
   {
     id: "3",
@@ -87,6 +94,8 @@ const initialValves: ValveData[] = [
     lastSetpoint: 30,
     lastUpdate: new Date(Date.now() - 300000),
     hasAlert: false,
+    location: "North Side, Sector 2",
+    flowRate: 0,
   },
   {
     id: "4",
@@ -98,6 +107,9 @@ const initialValves: ValveData[] = [
     percentage: 0,
     lastSetpoint: 25,
     lastUpdate: new Date(Date.now() - 600000),
+    hasAlert: true,
+    location: "South Side, Sector 3",
+    flowRate: 0,
   },
   {
     id: "5",
@@ -109,6 +121,8 @@ const initialValves: ValveData[] = [
     percentage: 75,
     lastSetpoint: 75,
     lastUpdate: new Date(),
+    location: "Central, Sector 5",
+    flowRate: 72,
   },
   {
     id: "6",
@@ -121,6 +135,8 @@ const initialValves: ValveData[] = [
     lastSetpoint: 25,
     lastUpdate: new Date(),
     hasAlert: false,
+    location: "East Side, Sector 8",
+    flowRate: 45,
   },
   {
     id: "7",
@@ -132,6 +148,8 @@ const initialValves: ValveData[] = [
     percentage: 60,
     lastSetpoint: 60,
     lastUpdate: new Date(),
+    location: "West Side, Sector 4",
+    flowRate: 58,
   },
   {
     id: "8",
@@ -143,6 +161,8 @@ const initialValves: ValveData[] = [
     percentage: 0,
     lastSetpoint: 20,
     lastUpdate: new Date(),
+    location: "North Side, Sector 6",
+    flowRate: 40,
   },
   {
     id: "9",
@@ -155,6 +175,8 @@ const initialValves: ValveData[] = [
     lastSetpoint: 80,
     lastUpdate: new Date(),
     hasAlert: false,
+    location: "South Side, Sector 7",
+    flowRate: 90,
   },
   {
     id: "10",
@@ -166,6 +188,8 @@ const initialValves: ValveData[] = [
     percentage: 10,
     lastSetpoint: 10,
     lastUpdate: new Date(),
+    location: "East Side, Sector 9",
+    flowRate: 43,
   },
 ];
 
@@ -221,7 +245,7 @@ export default function Dashboard() {
           <View className="flex-1">
             <View className="flex-row items-center mb-3">
               <View
-                className={`w-12 h-12 rounded-2xl items-center justify-center mr-3 ${colorClasses[color]}`}
+                className={`w-12 h-12 items-center justify-center mr-3 ${colorClasses[color]}`}
               >
                 <Icon size={24} color="currentColor" />
               </View>
@@ -256,110 +280,50 @@ export default function Dashboard() {
     );
   };
 
-  const ValveCard = ({ valve }: { valve: ValveData }) => {
-    const statusColors = {
-      online: "bg-emerald-500",
-      offline: "bg-red-500",
-      maintenance: "bg-orange-500",
-    };
+  // Convert ValveData to Valve format for the new ValveCard component
+  const convertToValve = (valveData: ValveData): Valve => ({
+    id: valveData.id,
+    name: valveData.name,
+    isOnline: valveData.status === 'online',
+    isOpen: valveData.isActive,
+    percentage: valveData.percentage || 0,
+    lastUpdate: valveData.lastUpdate,
+    hasAlert: valveData.hasAlert,
+    alertMessage: valveData.hasAlert ? 'System alert detected' : undefined,
+    location: valveData.location,
+    pressure: valveData.pressure,
+    flowRate: valveData.flowRate,
+    status: valveData.status === 'maintenance' ? 'error' : valveData.status,
+  });
 
-    return (
-      <Card
-        variant="subtle"
-        size="md"
-        className={cn(
-          "bg-white border",
-          valve.hasAlert ? "border-red-200" : "border-slate-100",
-          selectedValveId === valve.id && "ring-2 ring-emerald-400/60"
-        )}
-      >
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-1">
-            <Text className="text-slate-900 font-semibold text-lg">
-              {valve.name}
-            </Text>
-            <View className="flex-row items-center mt-1">
-              <View
-                className={`w-2 h-2 rounded-full mr-2 ${
-                  statusColors[valve.status]
-                }`}
-              />
-              <Text className="text-slate-600 text-sm capitalize">
-                {valve.status}
-              </Text>
-            </View>
-          </View>
+  const handleValveToggle = (id: string, isOpen: boolean) => {
+    setValves((prev) =>
+      prev.map((v) =>
+        v.id === id
+          ? {
+              ...v,
+              isActive: isOpen,
+              percentage: isOpen && (v.percentage ?? 0) === 0 
+                ? v.lastSetpoint ?? 50 
+                : v.percentage,
+            }
+          : v
+      )
+    );
+  };
 
-          <View className="flex-row items-center">
-            <Pressable
-              className="w-8 h-8 rounded-lg bg-slate-50 items-center justify-center mr-2"
-              onPress={() => {
-                setValves((prev) =>
-                  prev.map((v) =>
-                    v.id === valve.id
-                      ? {
-                          ...v,
-                          isActive: !v.isActive,
-                          // preserve percentage; if turning on from 0, restore lastSetpoint or default 50
-                          percentage:
-                            !v.isActive && (v.percentage ?? 0) === 0
-                              ? v.lastSetpoint ?? 50
-                              : v.percentage,
-                        }
-                      : v
-                  )
-                );
-              }}
-            >
-              {valve.isActive ? (
-                <Pause size={16} color="#64748b" />
-              ) : (
-                <Play size={16} color="#64748b" />
-              )}
-            </Pressable>
-            <Pressable
-              className="w-8 h-8 rounded-lg bg-slate-50 items-center justify-center"
-              onPress={() => setSelectedValveId(valve.id)}
-            >
-              <MoreVertical size={16} color="#64748b" />
-            </Pressable>
-          </View>
-        </View>
-
-        <View className="border-t border-slate-100 pt-3">
-          <View className="flex-row justify-between">
-            <View className="flex-1 items-center">
-              <View className="flex-row items-center mb-1">
-                <Gauge size={14} color="#64748b" />
-                <Text className="text-slate-500 text-xs ml-1">Pressure</Text>
-              </View>
-              <Text className="text-slate-900 font-semibold">
-                {valve.pressure} PSI
-              </Text>
-            </View>
-            <View className="flex-1 items-center">
-              <View className="flex-row items-center mb-1">
-                <Droplets size={14} color="#64748b" />
-                <Text className="text-slate-500 text-xs ml-1">Flow</Text>
-              </View>
-              <Text className="text-slate-900 font-semibold">
-                {valve.flow}%
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {valve.hasAlert && (
-          <View className="bg-red-50 border border-red-200 rounded-lg p-2 mt-3">
-            <View className="flex-row items-center">
-              <AlertTriangle size={14} color="#dc2626" />
-              <Text className="text-red-700 text-xs ml-2">
-                System alert detected
-              </Text>
-            </View>
-          </View>
-        )}
-      </Card>
+  const handlePercentageChange = (id: string, percentage: number) => {
+    setValves((prev) =>
+      prev.map((v) =>
+        v.id === id
+          ? {
+              ...v,
+              percentage,
+              isActive: percentage > 0,
+              lastSetpoint: percentage,
+            }
+          : v
+      )
     );
   };
 
@@ -465,101 +429,19 @@ export default function Dashboard() {
           />
         }
       >
-        <View className="py-6">
+        <View className="py-10">
           {/* Header */}
           <View className="mb-8">
-            <Text className="text-slate-900 text-3xl font-bold mb-2">
-              System Overview
+            <Text className="text-slate-900 text-3xl mb-1">
+              Valves
             </Text>
             <Text className="text-slate-600 text-base">
-              Monitor and control your valve infrastructure
+              Valve monitor and control center
             </Text>
-          </View>
-
-          {/* Stats Grid */}
-          <View
-            className={`mb-8 ${
-              isTablet ? "flex-row flex-wrap -mx-2" : "space-y-4"
-            }`}
-          >
-            <View className={isTablet ? "w-1/2 px-2 mb-4" : ""}>
-              <StatCard
-                icon={CheckCircle}
-                title="Online Systems"
-                value={computedStats.onlineValves}
-                subtitle={`${computedStats.totalValves} total systems`}
-                color="green"
-                trend="up"
-              />
-            </View>
-            <View className={isTablet ? "w-1/2 px-2 mb-4" : ""}>
-              <StatCard
-                icon={Activity}
-                title="Active Valves"
-                value={computedStats.activeValves}
-                subtitle="Currently operating"
-                color="blue"
-              />
-            </View>
-            {/* Temperature card removed */}
-            <View className={isTablet ? "w-1/2 px-2 mb-4" : ""}>
-              <StatCard
-                icon={AlertTriangle}
-                title="Active Alerts"
-                value={computedStats.alerts}
-                subtitle="Require attention"
-                color="red"
-              />
-            </View>
-          </View>
-
-          {/* Quick Actions */}
-          <View className="mb-8">
-            <Text className="text-slate-900 text-xl font-semibold mb-4">
-              Quick Actions
-            </Text>
-            <View className="flex-row space-x-3">
-              <Pressable
-                className="flex-1 bg-blue-500 rounded-2xl p-4 items-center"
-                onPress={() => {
-                  setValves((prev) =>
-                    prev.map((v) => ({ ...v, isActive: false }))
-                  );
-                }}
-              >
-                <Zap size={24} color="white" />
-                <Text className="text-white font-semibold mt-2">
-                  Emergency Stop
-                </Text>
-              </Pressable>
-              <Pressable
-                className="flex-1 bg-emerald-500 rounded-2xl p-4 items-center"
-                onPress={() => {
-                  setValves((prev) =>
-                    prev.map((v) => ({ ...v, hasAlert: false }))
-                  );
-                }}
-              >
-                <Settings size={24} color="white" />
-                <Text className="text-white font-semibold mt-2">
-                  System Check
-                </Text>
-              </Pressable>
-              <Pressable
-                className="flex-1 bg-orange-500 rounded-2xl p-4 items-center"
-                onPress={() => {}}
-              >
-                <BarChart3 size={24} color="white" />
-                <Text className="text-white font-semibold mt-2">Reports</Text>
-              </Pressable>
-            </View>
           </View>
 
           {/* Valves Grid with Filters and Detail Panel */}
           <View>
-            <Text className="text-slate-900 text-xl font-semibold mb-4">
-              Valves
-            </Text>
 
             <View className="flex-row flex-wrap mb-4">
               <Chip
@@ -610,10 +492,14 @@ export default function Dashboard() {
                   {filteredValves.map((valve) => (
                     <View
                       key={valve.id}
-                      className={isTablet ? "w-1/2 px-2 mb-4" : ""}
+                      className={isTablet ? "w-1/2 px-2 mb-4" : "mb-4"}
                     >
                       <Pressable onPress={() => setSelectedValveId(valve.id)}>
-                        <ValveCard valve={valve} />
+                        <ValveCard 
+                          valve={convertToValve(valve)}
+                          onToggle={handleValveToggle}
+                          onPercentageChange={handlePercentageChange}
+                        />
                       </Pressable>
                     </View>
                   ))}

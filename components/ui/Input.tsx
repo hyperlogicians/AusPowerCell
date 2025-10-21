@@ -40,6 +40,7 @@ export const Input = forwardRef<TextInput, InputProps>(
               borderWidth: 0,
               outline: 'none',
               boxShadow: 'none',
+              WebkitTextFillColor: 'inherit !important',
             }}
             {...props}
           />

@@ -5,6 +5,12 @@ import { Button } from './ui/Button';
 import { Switch } from './ui/Switch';
 import { cn } from '../lib/utils';
 import * as Haptics from 'expo-haptics';
+import { CircleGaugeIcon, Gauge, Droplets, MapPin, CirclePower } from 'lucide-react-native';
+
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import {
+  BreastPumpIcon,
+} from '@hugeicons/core-free-icons';
 
 export interface Valve {
   id: string;
@@ -15,6 +21,10 @@ export interface Valve {
   lastUpdate: Date;
   hasAlert?: boolean;
   alertMessage?: string;
+  location?: string;
+  pressure?: number;
+  flowRate?: number;
+  status?: 'online' | 'offline' | 'error';
 }
 
 interface ValveCardProps {
@@ -44,91 +54,185 @@ export function ValveCard({
     onPercentageChange(valve.id, percentage);
   };
 
+  // Determine card theme based on status
+  const getCardTheme = () => {
+    if (valve.status === 'error' || valve.hasAlert) {
+      return {
+        topBar: 'bg-red-500',
+        background: 'bg-red-50',
+        border: 'border-red-200',
+        iconColor: 'red',
+        statusColor: 'red',
+        statusText: 'Error',
+        powerColor: 'gray'
+      };
+    } else if (valve.isOnline && valve.isOpen) {
+      return {
+        topBar: 'bg-green-500',
+        background: 'bg-green-50',
+        border: 'border-green-200',
+        iconColor: 'green',
+        statusColor: 'green',
+        statusText: 'Online',
+        powerColor: 'green'
+      };
+    } else if (valve.isOnline && !valve.isOpen) {
+      return {
+        topBar: 'bg-gray-500',
+        background: 'bg-gray-50',
+        border: 'border-gray-200',
+        iconColor: 'gray',
+        statusColor: 'green',
+        statusText: 'Online',
+        powerColor: 'gray'
+      };
+    } else {
+      return {
+        topBar: 'bg-gray-500',
+        background: 'bg-gray-50',
+        border: 'border-gray-200',
+        iconColor: 'gray',
+        statusColor: 'gray',
+        statusText: 'Offline',
+        powerColor: 'gray'
+      };
+    }
+  };
+
+  const theme = getCardTheme();
+
   return (
-    <Card 
-      variant={valve.hasAlert ? 'elevated' : 'subtle'} 
-      size="lg"
-      className={cn(
-        'mb-6 transition-all duration-300 bg-white/90',
-        isOptimistic && 'opacity-70',
-        valve.hasAlert && 'bg-red-50'
-      )}
-    >
-      <View className="flex-row items-start justify-between mb-4">
-        <View className="flex-1">
-          <Text className="text-slate-900 font-semibold text-2xl mb-2 tracking-wide">
-            {valve.name}
-          </Text>
-          <View className="flex-row items-center">
-            <View className={cn(
-              'w-3 h-3 rounded-full mr-3',
-              valve.isOnline ? 'bg-emerald-500' : 'bg-red-500'
-            )} />
-            <Text className="text-slate-600 text-base font-medium">
-              {valve.isOnline ? 'Online' : 'Offline'}
+    <View className={cn(
+      'rounded-3xl overflow-hidden shadow-sm',
+      theme.background,
+      theme.border,
+      'border',
+      isOptimistic && 'opacity-70'
+    )}>
+      {/* Top colored bar */}
+      <View className={cn('h-[4px] mx-10 my-2 rounded-full', theme.topBar)} />
+      
+      {/* Header Section */}
+      <View className="p-6">
+        <View className="flex-row items-start justify-between mb-4">
+          <View className="flex-1">
+            {/* Icon and Title */}
+            <View className="flex-row items-center mb-3">
+              <View className="rotate-180 mr-3">
+                <HugeiconsIcon 
+                  icon={BreastPumpIcon} 
+                  size={28} 
+                  color={theme.iconColor} 
+                />
+              </View>
+              <View className="flex-1">
+                <Text className="text-slate-900 font-bold text-lg mb-1">
+                  {valve.name}
+                </Text>
+                <Text className="text-slate-600 text-sm">
+                  APC-20N-02
+                </Text>
+              </View>
+            </View>
+
+            {/* Status and Location */}
+            <View className="flex-row items-center mb-2">
+              <View className={cn(
+                'w-2 h-2 rounded-full mr-2',
+                theme.statusColor === 'green' ? 'bg-green-500' : 
+                theme.statusColor === 'red' ? 'bg-red-500' : 'bg-gray-500'
+              )} />
+              <Text className={cn(
+                'text-sm font-medium',
+                theme.statusColor === 'green' ? 'text-green-600' : 
+                theme.statusColor === 'red' ? 'text-red-600' : 'text-gray-600'
+              )}>
+                {theme.statusText}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center justify-between">
+              {/* Location */}
+              <View className="flex-row items-center">
+                <MapPin size={16} color="gray" />
+                <Text className="text-gray-600 text-sm ml-1">
+                  {valve.location || 'North Side, Sector 1'}
+                </Text>
+              </View>
+              {/* Power Button */}
+                        <TouchableOpacity
+              onPress={() => handleToggle(!valve.isOpen)}
+              disabled={!valve.isOnline}
+              className={cn(
+                'w-10 h-10 rounded-full items-center justify-center',
+                theme.powerColor === 'green' ? 'text-green-500' : 'text-gray-400',
+                !valve.isOnline && 'opacity-50'
+              )}
+                        >
+              <CirclePower size={20} />
+                        </TouchableOpacity>
+            </View>
+
+          </View>
+
+          
+        </View>
+
+        {/* Separator */}
+        <View className={cn('h-px mb-4', theme.border)} />
+
+        {/* Metrics Section */}
+        <View className="flex-row justify-between">
+          {/* Percentage */}
+          <View className="flex-1 items-center">
+          <CircleGaugeIcon size={24} color="black" />
+            <Text className={cn(
+              'text-sm font-medium mt-1',
+              valve.isOnline ? 'text-black' : 'text-gray-500'
+            )}>
+              {valve.isOnline ? `${valve.percentage}%` : '0%'}
             </Text>
-            <View className="w-1 h-1 bg-white/30 rounded-full mx-3" />
-            <Text className="text-slate-600 text-base font-medium">
-              {valve.percentage}% Open
+          </View>
+
+          {/* Pressure */}
+          <View className="flex-1 items-center">
+            <Gauge size={24} color="black" />
+            <Text className={cn(
+              'text-sm font-medium mt-1',
+              valve.isOnline && valve.pressure ? 'text-black' : 'text-gray-500'
+            )}>
+              {valve.isOnline && valve.pressure ? `${valve.pressure} PSI` : '- PSI'}
+            </Text>
+          </View>
+
+          {/* Flow Rate */}
+          <View className="flex-1 items-center">
+            <Droplets size={24} color="black" />
+            <Text className={cn(
+              'text-sm font-medium mt-1',
+              valve.isOnline && valve.flowRate ? 'text-black' : 'text-gray-500'
+            )}>
+              {valve.isOnline && valve.flowRate ? `${valve.flowRate} L/min` : '- L/min'}
             </Text>
           </View>
         </View>
-        
-        <View className="items-end">
-          <Switch
-            value={valve.isOpen}
-            onValueChange={handleToggle}
-            disabled={!valve.isOnline}
-          />
-          <Text className="text-slate-500 text-xs mt-1 font-medium">
-            {valve.isOpen ? 'Active' : 'Closed'}
-          </Text>
-        </View>
       </View>
 
+      {/* Alert Message */}
       {valve.hasAlert && valve.alertMessage && (
-        <View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+        <View className="mx-6 mb-4 bg-red-100 border border-red-200 rounded-lg p-3">
           <Text className="text-red-700 text-sm">{valve.alertMessage}</Text>
         </View>
       )}
 
-      <View className="border-t border-white/5 pt-4 mt-4">
-        <Text className="text-slate-500 text-sm mb-4 font-medium tracking-wide">
-          QUICK CONTROLS
-        </Text>
-        <View className="flex-row justify-between">
-          {[0, 25, 50, 75, 100].map((percentage) => (
-            <TouchableOpacity
-              key={percentage}
-              onPress={() => handlePercentagePress(percentage)}
-              className={cn(
-                'px-4 py-3 rounded-xl transition-all duration-200',
-                valve.percentage === percentage 
-                  ? 'bg-blue-500/80 border border-blue-400/50' 
-                  : 'bg-white/5 border border-white/10 hover:bg-white/10',
-                !valve.isOnline && 'opacity-50'
-              )}
-              disabled={!valve.isOnline}
-            >
-              <Text className={cn(
-                'text-sm font-medium text-center',
-                valve.percentage === percentage ? 'text-white' : 'text-white/70',
-                !valve.isOnline && 'text-white/40'
-              )}>
-                {percentage}%
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
+      {/* Optimistic State */}
       {isOptimistic && (
-        <View className="mt-2 px-2 py-1 bg-yellow-500/20 rounded border border-yellow-400/30">
-          <Text className="text-yellow-300 text-xs text-center">
+        <View className="mx-6 mb-4 bg-yellow-100 border border-yellow-200 rounded-lg p-2">
+          <Text className="text-yellow-700 text-xs text-center">
             Command queued - waiting for connection
           </Text>
         </View>
       )}
-    </Card>
+    </View>
   );
 }
