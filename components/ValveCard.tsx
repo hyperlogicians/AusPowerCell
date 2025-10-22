@@ -32,13 +32,15 @@ interface ValveCardProps {
   onToggle: (id: string, isOpen: boolean) => void;
   onPercentageChange: (id: string, percentage: number) => void;
   isOptimistic?: boolean;
+  isSelected?: boolean;
 }
 
 export function ValveCard({ 
   valve, 
   onToggle, 
   onPercentageChange, 
-  isOptimistic = false 
+  isOptimistic = false,
+  isSelected = false,
 }: ValveCardProps) {
   const handleToggle = async (newValue: boolean) => {
     if (Platform.OS !== 'web' && typeof Haptics.impactAsync === 'function') {
@@ -58,7 +60,7 @@ export function ValveCard({
   const getCardTheme = () => {
     if (valve.status === 'error' || valve.hasAlert) {
       return {
-        topBar: 'bg-red-500',
+        topBar: 'bg-red-400',
         background: 'bg-red-50',
         border: 'border-red-200',
         iconColor: 'red',
@@ -68,7 +70,7 @@ export function ValveCard({
       };
     } else if (valve.isOnline && valve.isOpen) {
       return {
-        topBar: 'bg-green-500',
+        topBar: 'bg-green-400',
         background: 'bg-green-50',
         border: 'border-green-200',
         iconColor: 'green',
@@ -78,7 +80,7 @@ export function ValveCard({
       };
     } else if (valve.isOnline && !valve.isOpen) {
       return {
-        topBar: 'bg-gray-500',
+        topBar: 'bg-gray-300',
         background: 'bg-gray-50',
         border: 'border-gray-200',
         iconColor: 'gray',
@@ -88,7 +90,7 @@ export function ValveCard({
       };
     } else {
       return {
-        topBar: 'bg-gray-500',
+        topBar: 'bg-gray-300',
         background: 'bg-gray-50',
         border: 'border-gray-200',
         iconColor: 'gray',
@@ -105,12 +107,23 @@ export function ValveCard({
     <View className={cn(
       'rounded-3xl overflow-hidden shadow-sm',
       theme.background,
-      theme.border,
+      isSelected ? 'border-2 border-black/40' : theme.border,
       'border',
       isOptimistic && 'opacity-70'
     )}>
       {/* Top colored bar */}
-      <View className={cn('h-[4px] mx-10 my-2 rounded-full', theme.topBar)} />
+      <View
+        className={cn('h-[6px] mx-20 mt-4 rounded-full border border-slate-400', theme.topBar)}
+        style={{
+          // React Native shadow (iOS)
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          // Android shadow
+          elevation: 2,
+        }}
+      />
       
       {/* Header Section */}
       <View className="p-6">
@@ -121,7 +134,7 @@ export function ValveCard({
               <View className="rotate-180 mr-3">
                 <HugeiconsIcon 
                   icon={BreastPumpIcon} 
-                  size={28} 
+                  size={35} 
                   color={theme.iconColor} 
                 />
               </View>
@@ -154,7 +167,7 @@ export function ValveCard({
             <View className="flex-row items-center justify-between">
               {/* Location */}
               <View className="flex-row items-center">
-                <MapPin size={16} color="gray" />
+                <MapPin size={24} color="gray" />
                 <Text className="text-gray-600 text-sm ml-1">
                   {valve.location || 'North Side, Sector 1'}
                 </Text>
@@ -169,7 +182,7 @@ export function ValveCard({
                 !valve.isOnline && 'opacity-50'
               )}
                         >
-              <CirclePower size={20} />
+              <CirclePower size={24} />
                         </TouchableOpacity>
             </View>
 
@@ -179,10 +192,10 @@ export function ValveCard({
         </View>
 
         {/* Separator */}
-        <View className={cn('h-px mb-4', theme.border)} />
+        <View className={cn('h-px mb-4 border-t border-slate-300')} />
 
         {/* Metrics Section */}
-        <View className="flex-row justify-between">
+        <View className="flex-row justify-between opacity-70">
           {/* Percentage */}
           <View className="flex-1 items-center">
           <CircleGaugeIcon size={24} color="black" />
