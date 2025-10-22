@@ -167,7 +167,7 @@ export function ValveCard({
             <View className="flex-row items-center justify-between">
               {/* Location */}
               <View className="flex-row items-center">
-                <MapPin size={24} color="gray" />
+                <MapPin size={20} color="gray" />
                 <Text className="text-gray-600 text-sm ml-1">
                   {valve.location || 'North Side, Sector 1'}
                 </Text>
@@ -182,7 +182,7 @@ export function ValveCard({
                 !valve.isOnline && 'opacity-50'
               )}
                         >
-              <CirclePower size={24} />
+              <CirclePower size={30} />
                         </TouchableOpacity>
             </View>
 

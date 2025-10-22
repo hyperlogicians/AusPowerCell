@@ -702,7 +702,7 @@ export default function Dashboard() {
                   <View className="flex-row items-center justify-between mb-3">
                     {/* Location */}
                     <View className="flex-row items-center mt-6">
-                      <MapPin size={16} color="gray" />
+                      <MapPin size={20} color="gray" />
                       <Text className="text-gray-600 text-sm ml-2">
                         {selectedValve?.location || "North Side, Sector 1"}
                       </Text>
@@ -724,7 +724,7 @@ export default function Dashboard() {
               <View className="flex-row justify-between mb-6">
                 <View className="items-center flex-1">
                   <Clock size={24} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-2xl font-bold mt-2">
+                  <Text className="text-slate-900 text-2xl font-medium mt-2">
                     {selectedValve?.percentage ?? 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>%</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
@@ -733,7 +733,7 @@ export default function Dashboard() {
                 </View>
                 <View className="items-center flex-1">
                   <Gauge size={24} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-2xl font-bold mt-2">
+                  <Text className="text-slate-900 text-2xl font-medium mt-2">
                     {selectedValve?.pressure || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>PSI</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
@@ -742,7 +742,7 @@ export default function Dashboard() {
                 </View>
                 <View className="items-center flex-1">
                   <Droplets size={24} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-2xl font-bold mt-2">
+                  <Text className="text-slate-900 text-2xl font-medium mt-2">
                     {selectedValve?.flowRate || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>L/min</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
