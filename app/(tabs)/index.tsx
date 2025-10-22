@@ -228,7 +228,7 @@ export default function Dashboard() {
     color?: "blue" | "green" | "red" | "orange";
   }) => {
     const colorClasses = {
-      blue: "bg-blue-50 border-blue-100 text-blue-600",
+      blue: "bg-sky-50 border-sky-100 text-sky-600",
       green: "bg-emerald-50 border-emerald-100 text-emerald-600",
       red: "bg-red-50 border-red-100 text-red-600",
       orange: "bg-orange-50 border-orange-100 text-orange-600",
@@ -398,8 +398,8 @@ export default function Dashboard() {
     <Pressable
       onPress={onPress}
       className={cn(
-        "px-3 py-2 rounded-full mr-2 mb-2 border",
-        active ? "bg-blue-500 border-blue-400" : "bg-white border-slate-200"
+        "px-3 py-2 rounded-2xl mr-2 mb-2 border",
+        active ? "bg-sky-800/70 border-sky-700/70" : "bg-white border-slate-200"
       )}
     >
       <Text
@@ -542,26 +542,19 @@ export default function Dashboard() {
                   cx={cx}
                   cy={cy}
                   r={radius}
-                  stroke="#3b82f6"
+                  stroke="#4C88A7"
                   strokeWidth={strokeWidth}
                   fill="none"
                 />
               ) : value > 0 ? (
                 <Path
                   d={describeArc(cx, cy, radius, currentAngle)}
-                  stroke="#3b82f6"
+                  stroke="#4C88A7"
                   strokeWidth={strokeWidth}
                   fill="none"
                   strokeLinecap="round"
                 />
               ) : null}
-              {/* Knob */}
-              <SvgCircle
-                cx={knobPoint.x}
-                cy={knobPoint.y}
-                r={knobRadius}
-                fill="#3b82f6"
-              />
             </G>
           </Svg>
         </View>
@@ -673,7 +666,7 @@ export default function Dashboard() {
             variant={selectedValve?.hasAlert ? "elevated" : "subtle"}
             size="lg"
             className={cn(
-              "bg-gradient-to-b from-white to-blue-400 border rounded-3xl h-full",
+              "bg-gradient-to-b from-white via-sky-100 to-sky-800/80 border rounded-3xl h-full",
               selectedValve?.hasAlert ? "border-red-200" : "border-slate-400"
             )}
           >
@@ -686,12 +679,12 @@ export default function Dashboard() {
                     <View className="rotate-180 mr-3">
                       <HugeiconsIcon
                         icon={BreastPumpIcon}
-                        size={52}
+                        size={62}
                         color="green"
                       />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-slate-900 font-bold text-xl mb-1">
+                      <Text className="text-slate-900 font-semibold text-3xl mb-1">
                         {selectedValve?.name}
                       </Text>
                       <Text className="text-slate-600 text-sm">APC-20N-02</Text>
@@ -755,14 +748,14 @@ export default function Dashboard() {
               <View className="bg-white border border-slate-400 rounded-3xl p-6 mb-6">
                 {/* Presets */}
                 <View className="flex-row mb-4">
-                  {[0, 50, 100].map((p) => (
+                  {[0, 25, 50, 75, 100].map((p) => (
                     <Pressable
                       key={p}
                       className={cn(
                         "px-3 py-1 rounded-lg mr-2 border",
                         (selectedValve?.percentage ?? 0) === p
-                          ? "bg-blue-500 border-blue-400"
-                          : "bg-white border-slate-200"
+                          ? "bg-sky-800/70 border-sky-700/70"
+                          : "bg-black/5 border-slate-200"
                       )}
                       onPress={() =>
                         setValves((prev) =>
