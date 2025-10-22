@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,28 +7,27 @@ import {
   useWindowDimensions,
   Platform,
   Pressable,
+  TouchableOpacity,
+  PanResponder,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
 import { ValveCard, Valve } from "../../components/ValveCard";
 import { cn } from "../../lib/utils";
 import * as Haptics from "expo-haptics";
+import Svg, { G, Circle as SvgCircle, Path, Line } from "react-native-svg";
 import {
-  Activity,
-  Zap,
   Gauge,
-  AlertTriangle,
-  CheckCircle,
   TrendingUp,
-  Settings,
-  Play,
-  Pause,
-  MoreVertical,
   Droplets,
-  Thermometer,
-  BarChart3,
+  Clock,
+  MapPin,
+  CirclePower,
+  Power,
 } from "lucide-react-native";
 import { statusStore } from "../../lib/status";
+import { HugeiconsIcon } from "@hugeicons/react-native";
+import { BreastPumpIcon } from "@hugeicons/core-free-icons";
 
 interface SystemStats {
   totalValves: number;
@@ -229,7 +228,7 @@ export default function Dashboard() {
     color?: "blue" | "green" | "red" | "orange";
   }) => {
     const colorClasses = {
-      blue: "bg-blue-50 border-blue-100 text-blue-600",
+      blue: "bg-sky-50 border-sky-100 text-sky-600",
       green: "bg-emerald-50 border-emerald-100 text-emerald-600",
       red: "bg-red-50 border-red-100 text-red-600",
       orange: "bg-orange-50 border-orange-100 text-orange-600",
@@ -284,16 +283,15 @@ export default function Dashboard() {
   const convertToValve = (valveData: ValveData): Valve => ({
     id: valveData.id,
     name: valveData.name,
-    isOnline: valveData.status === 'online',
+    isOnline: valveData.status === "online",
     isOpen: valveData.isActive,
     percentage: valveData.percentage || 0,
     lastUpdate: valveData.lastUpdate,
     hasAlert: valveData.hasAlert,
-    alertMessage: valveData.hasAlert ? 'System alert detected' : undefined,
     location: valveData.location,
     pressure: valveData.pressure,
     flowRate: valveData.flowRate,
-    status: valveData.status === 'maintenance' ? 'error' : valveData.status,
+    status: valveData.status === "maintenance" ? "error" : valveData.status,
   });
 
   const handleValveToggle = (id: string, isOpen: boolean) => {
@@ -303,9 +301,10 @@ export default function Dashboard() {
           ? {
               ...v,
               isActive: isOpen,
-              percentage: isOpen && (v.percentage ?? 0) === 0 
-                ? v.lastSetpoint ?? 50 
-                : v.percentage,
+              percentage:
+                isOpen && (v.percentage ?? 0) === 0
+                  ? v.lastSetpoint ?? 50
+                  : v.percentage,
             }
           : v
       )
@@ -399,8 +398,8 @@ export default function Dashboard() {
     <Pressable
       onPress={onPress}
       className={cn(
-        "px-3 py-2 rounded-full mr-2 mb-2 border",
-        active ? "bg-blue-500 border-blue-400" : "bg-white border-slate-200"
+        "px-3 py-2 rounded-2xl mr-2 mb-2 border",
+        active ? "bg-sky-800/70 border-sky-700/70" : "bg-white border-slate-200"
       )}
     >
       <Text
@@ -410,212 +409,353 @@ export default function Dashboard() {
         )}
       >
         {label}
-        {typeof count === "number" ? ` ${count}` : ""}
+        <span style={{ opacity: 0.75, fontWeight: 'normal' }}>{typeof count === "number" ? ` ${count}` : ""}</span>
       </Text>
     </Pressable>
   );
 
+  // Circular Slider Component
+  const CircularSlider = ({
+    value,
+    onValueChange,
+    size = 160,
+    strokeWidth = 12,
+  }: {
+    value: number;
+    onValueChange: (value: number) => void;
+    size?: number;
+    strokeWidth?: number;
+  }) => {
+    const radius = (size - strokeWidth) / 2;
+    const knobSize = 24;
+    const knobRadius = knobSize / 2;
+    const cx = size / 2;
+    const cy = size / 2;
+
+    // Convert angle (deg) to cartesian point on circle
+    const polarToCartesian = (
+      centerX: number,
+      centerY: number,
+      r: number,
+      angleInDegrees: number
+    ) => {
+      const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+      return {
+        x: centerX + r * Math.cos(angleInRadians),
+        y: centerY + r * Math.sin(angleInRadians),
+      };
+    };
+
+    // SVG Arc path from 0 to value angle
+    const describeArc = (x: number, y: number, r: number, endAngle: number) => {
+      const start = polarToCartesian(x, y, r, 0);
+      const end = polarToCartesian(x, y, r, endAngle);
+      const largeArcFlag = endAngle <= 180 ? "0" : "1";
+      return [
+        "M",
+        start.x,
+        start.y,
+        "A",
+        r,
+        r,
+        0,
+        largeArcFlag,
+        1,
+        end.x,
+        end.y,
+      ].join(" ");
+    };
+
+    const currentAngle = (value / 100) * 360;
+    const knobPoint = polarToCartesian(cx, cy, radius, currentAngle);
+
+    const setFromGesture = (locationX: number, locationY: number) => {
+      const dx = locationX - cx;
+      const dy = locationY - cy;
+      let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90; // start from top
+      if (deg < 0) deg += 360;
+      const pct = Math.max(0, Math.min(100, Math.round((deg / 360) * 100)));
+      onValueChange(pct);
+    };
+
+    const panResponder = useRef(
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: (evt) => {
+          const { locationX, locationY } = evt.nativeEvent;
+          if (
+            Platform.OS !== "web" &&
+            typeof Haptics.impactAsync === "function"
+          ) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
+          setFromGesture(locationX, locationY);
+        },
+        onPanResponderMove: (evt) => {
+          const { locationX, locationY } = evt.nativeEvent;
+          setFromGesture(locationX, locationY);
+        },
+      })
+    ).current;
+
+    // Tick marks like a volume knob
+    const ticks = Array.from({ length: 40 }).map((_, i) => {
+      const angle = (i / 40) * 360;
+      const inner = polarToCartesian(cx, cy, radius - 8, angle);
+      const outer = polarToCartesian(cx, cy, radius, angle);
+      return (
+        <Line
+          key={i}
+          x1={inner.x}
+          y1={inner.y}
+          x2={outer.x}
+          y2={outer.y}
+          stroke="#cbd5e1"
+          strokeWidth={2}
+        />
+      );
+    });
+
+    return (
+      <View className="items-center">
+        <View
+          style={{ width: size, height: size }}
+          {...panResponder.panHandlers}
+        >
+          <Svg width={size} height={size}>
+            <G>
+              {/* Base circle */}
+              <SvgCircle
+                cx={cx}
+                cy={cy}
+                r={radius}
+                stroke="#e2e8f0"
+                strokeWidth={strokeWidth}
+                fill="none"
+              />
+              {/* Ticks */}
+              {ticks}
+              {/* Progress arc synced with knob (full circle at 100%) */}
+              {value >= 100 ? (
+                <SvgCircle
+                  cx={cx}
+                  cy={cy}
+                  r={radius}
+                  stroke="#4C88A7"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                />
+              ) : value > 0 ? (
+                <Path
+                  d={describeArc(cx, cy, radius, currentAngle)}
+                  stroke="#4C88A7"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              ) : null}
+            </G>
+          </Svg>
+        </View>
+        {/* Center value overlay */}
+        <View
+          style={{
+            position: "absolute",
+            width: size,
+            height: size,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          pointerEvents="none"
+        >
+          <Text className="text-slate-900 text-2xl font-bold">{value}%</Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1" edges={["top"]}>
-      <ScrollView
-        className="flex-1 px-6"
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#64748b"
-            colors={["#64748b"]}
-          />
-        }
-      >
-        <View className="py-10">
-          {/* Header */}
-          <View className="mb-8">
-            <Text className="text-slate-900 text-3xl mb-1">
-              Valves
-            </Text>
-            <Text className="text-slate-600 text-base">
-              Valve monitor and control center
-            </Text>
-          </View>
+      <View className="flex-1 flex-row">
+        {/* Left Side - Valve Grid (60% width) */}
+        <View className="flex-1" style={{ width: "60%" }}>
+          <ScrollView
+            className="flex-1 px-6"
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#64748b"
+                colors={["#64748b"]}
+              />
+            }
+          >
+            <View className="py-10">
+              {/* Header */}
+              <View className="mb-8">
+                <Text className="text-slate-900 text-3xl mb-1">Valves</Text>
+                <Text className="text-slate-600 text-base">
+                  Valves monitor and control center
+                </Text>
+              </View>
 
-          {/* Valves Grid with Filters and Detail Panel */}
-          <View>
+              {/* Filter Chips */}
+              <View className="flex-row flex-wrap mb-6">
+                <Chip
+                  label={`All Valves`}
+                  count={valves.length}
+                  active={filter === "all"}
+                  onPress={() => setFilter("all")}
+                />
+                <Chip
+                  label="Online"
+                  count={valves.filter((v) => v.status === "online").length}
+                  active={filter === "online"}
+                  onPress={() => setFilter("online")}
+                />
+                <Chip
+                  label="Offline"
+                  count={valves.filter((v) => v.status === "offline").length}
+                  active={filter === "offline"}
+                  onPress={() => setFilter("offline")}
+                />
+                <Chip
+                  label="Error"
+                  count={valves.filter((v) => v.hasAlert).length}
+                  active={filter === "error"}
+                  onPress={() => setFilter("error")}
+                />
+                <Chip
+                  label="On"
+                  count={valves.filter((v) => v.isActive).length}
+                  active={filter === "on"}
+                  onPress={() => setFilter("on")}
+                />
+                <Chip
+                  label="Off"
+                  count={valves.filter((v) => !v.isActive).length}
+                  active={filter === "off"}
+                  onPress={() => setFilter("off")}
+                />
+              </View>
 
-            <View className="flex-row flex-wrap mb-4">
-              <Chip
-                label={`All Valves`}
-                count={valves.length}
-                active={filter === "all"}
-                onPress={() => setFilter("all")}
-              />
-              <Chip
-                label="Online"
-                count={valves.filter((v) => v.status === "online").length}
-                active={filter === "online"}
-                onPress={() => setFilter("online")}
-              />
-              <Chip
-                label="Offline"
-                count={valves.filter((v) => v.status === "offline").length}
-                active={filter === "offline"}
-                onPress={() => setFilter("offline")}
-              />
-              <Chip
-                label="Error"
-                count={valves.filter((v) => v.hasAlert).length}
-                active={filter === "error"}
-                onPress={() => setFilter("error")}
-              />
-              <Chip
-                label="On"
-                count={valves.filter((v) => v.isActive).length}
-                active={filter === "on"}
-                onPress={() => setFilter("on")}
-              />
-              <Chip
-                label="Off"
-                count={valves.filter((v) => !v.isActive).length}
-                active={filter === "off"}
-                onPress={() => setFilter("off")}
-              />
+              {/* Valve Grid */}
+              <View className="flex-row flex-wrap -mx-2">
+                {filteredValves.map((valve) => (
+                  <View key={valve.id} className="w-1/2 px-2 mb-4">
+                    <Pressable onPress={() => setSelectedValveId(valve.id)}>
+                      <ValveCard
+                        valve={convertToValve(valve)}
+                        onToggle={handleValveToggle}
+                        onPercentageChange={handlePercentageChange}
+                        isSelected={valve.id === selectedValveId}
+                      />
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
             </View>
+          </ScrollView>
+        </View>
 
-            <View className={isTablet ? "flex-row -mx-2" : ""}>
-              <View className={isTablet ? "w-1/2 px-2" : ""}>
-                <View
-                  className={
-                    isTablet ? "flex-row flex-wrap -mx-2" : "space-y-4"
-                  }
-                >
-                  {filteredValves.map((valve) => (
-                    <View
-                      key={valve.id}
-                      className={isTablet ? "w-1/2 px-2 mb-4" : "mb-4"}
-                    >
-                      <Pressable onPress={() => setSelectedValveId(valve.id)}>
-                        <ValveCard 
-                          valve={convertToValve(valve)}
-                          onToggle={handleValveToggle}
-                          onPercentageChange={handlePercentageChange}
-                        />
-                      </Pressable>
+        {/* Right Side - Fixed Detail Panel (40% width) */}
+        <View className="py-5 pr-5" style={{ width: "40%" }}>
+          <Card
+            variant={selectedValve?.hasAlert ? "elevated" : "subtle"}
+            size="lg"
+            className={cn(
+              "bg-gradient-to-b from-white via-sky-100 to-sky-800/80 border rounded-3xl h-full",
+              selectedValve?.hasAlert ? "border-red-200" : "border-slate-400"
+            )}
+          >
+            {/* Header Section with Icon, Title, ID and Status */}
+            <View className="p-6">
+              <View className="flex-row items-start justify-between mb-4">
+                <View className="flex-1">
+                  {/* Icon and Title */}
+                  <View className="flex-row items-center mb-2">
+                    <View className="rotate-180 mr-3">
+                      <HugeiconsIcon
+                        icon={BreastPumpIcon}
+                        size={62}
+                        color="green"
+                      />
                     </View>
-                  ))}
+                    <View className="flex-1">
+                      <Text className="text-slate-900 font-semibold text-3xl mb-1">
+                        {selectedValve?.name}
+                      </Text>
+                      <Text className="text-slate-600 text-sm">APC-20N-02</Text>
+                    </View>
+                  </View>
+
+                  {/* Status */}
+                  <View className="flex-row items-center justify-between mb-3">
+                    {/* Location */}
+                    <View className="flex-row items-center mt-6">
+                      <MapPin size={20} color="gray" />
+                      <Text className="text-gray-600 text-sm ml-2">
+                        {selectedValve?.location || "North Side, Sector 1"}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                      <Text className="text-green-600 text-sm font-medium">
+                        Online
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               </View>
 
-              {/* Detail Panel */}
-              <View className={isTablet ? "w-1/2 px-2 mt-0" : "mt-6"}>
-                <Card
-                  variant={selectedValve?.hasAlert ? "elevated" : "subtle"}
-                  size="lg"
-                  className={cn(
-                    "bg-white border",
-                    selectedValve?.hasAlert
-                      ? "border-red-200"
-                      : "border-slate-100"
-                  )}
-                >
-                  <View className="mb-4">
-                    <Text className="text-slate-900 text-xl font-semibold">
-                      {selectedValve?.name}
-                    </Text>
-                    <Text className="text-slate-600 mt-1">
-                      North Side, Sector 1
-                    </Text>
-                  </View>
+              {/* Separator Line */}
+              <View className="h-px bg-slate-200 mb-4" />
 
-                  <View className="flex-row justify-between mb-4">
-                    <View className="items-center flex-1">
-                      <Text className="text-slate-900 text-2xl font-bold">
-                        {selectedValve?.percentage ?? 0}
-                        <Text className="text-base">%</Text>
-                      </Text>
-                      <Text className="text-slate-600 text-xs mt-1">
-                        Valve Open
-                      </Text>
-                    </View>
-                    <View className="items-center flex-1">
-                      <Text className="text-slate-900 text-2xl font-bold">
-                        {selectedValve?.pressure}{" "}
-                        <Text className="text-base">PSI</Text>
-                      </Text>
-                      <Text className="text-slate-600 text-xs mt-1">
-                        Water Pressure
-                      </Text>
-                    </View>
-                    <View className="items-center flex-1">
-                      <Text className="text-slate-900 text-2xl font-bold">
-                        {selectedValve?.flow ?? 0}
-                        <Text className="text-base"> L/min</Text>
-                      </Text>
-                      <Text className="text-slate-600 text-xs mt-1">
-                        Water Flow
-                      </Text>
-                    </View>
-                  </View>
+              {/* Key Metrics Section */}
+              <View className="flex-row justify-between mb-6">
+                <View className="items-center flex-1">
+                  <Clock size={24} color="black" className="opacity-75" />
+                  <Text className="text-slate-900 text-2xl font-medium mt-2">
+                    {selectedValve?.percentage ?? 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>%</span>
+                  </Text>
+                  <Text className="text-slate-600 text-xs mt-1">
+                    Valve Open
+                  </Text>
+                </View>
+                <View className="items-center flex-1">
+                  <Gauge size={24} color="black" className="opacity-75" />
+                  <Text className="text-slate-900 text-2xl font-medium mt-2">
+                    {selectedValve?.pressure || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>PSI</span>
+                  </Text>
+                  <Text className="text-slate-600 text-xs mt-1">
+                    Water Pressure
+                  </Text>
+                </View>
+                <View className="items-center flex-1">
+                  <Droplets size={24} color="black" className="opacity-75" />
+                  <Text className="text-slate-900 text-2xl font-medium mt-2">
+                    {selectedValve?.flowRate || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>L/min</span>
+                  </Text>
+                  <Text className="text-slate-600 text-xs mt-1">
+                    Water Flow
+                  </Text>
+                </View>
+              </View>
 
-                  {/* Quick Presets */}
-                  <View className="border rounded-2xl p-4 border-slate-200">
-                    <View className="flex-row mb-3">
-                      {[0, 50, 100].map((p) => (
-                        <Pressable
-                          key={p}
-                          className={cn(
-                            "px-3 py-1 rounded-lg mr-2 border",
-                            (selectedValve?.percentage ?? 0) === p
-                              ? "bg-blue-500 border-blue-400"
-                              : "bg-white border-slate-200"
-                          )}
-                          onPress={() =>
-                            setValves((prev) =>
-                              prev.map((v) =>
-                                v.id === selectedValveId
-                                  ? {
-                                      ...v,
-                                      percentage: p,
-                                      isActive:
-                                        p > 0 ? true : v.isActive && false,
-                                      lastSetpoint:
-                                        p > 0 ? p : v.lastSetpoint ?? 50,
-                                    }
-                                  : v
-                              )
-                            )
-                          }
-                        >
-                          <Text
-                            className={cn(
-                              "text-sm",
-                              (selectedValve?.percentage ?? 0) === p
-                                ? "text-white"
-                                : "text-slate-700"
-                            )}
-                          >
-                            {p}%
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-
-                    {/* Simple donut visual substitute with text for now */}
-                    <View className="items-center py-10">
-                      <Text className="text-slate-600">
-                        Setpoint: {selectedValve?.percentage ?? 0}%
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Power Button */}
-                  <View className="items-center mt-6">
+              {/* Circular Slider Section */}
+              <View className="bg-white border border-slate-400 rounded-3xl p-6 mb-6">
+                {/* Presets */}
+                <View className="flex-row mb-4">
+                  {[0, 25, 50, 75, 100].map((p) => (
                     <Pressable
+                      key={p}
                       className={cn(
-                        "px-6 py-3 rounded-full border",
-                        selectedValve?.isActive
-                          ? "border-emerald-400 bg-emerald-50"
-                          : "border-slate-300 bg-slate-50"
+                        "px-3 py-1 rounded-lg mr-2 border",
+                        (selectedValve?.percentage ?? 0) === p
+                          ? "bg-sky-800/70 border-sky-700/70"
+                          : "bg-black/5 border-slate-200"
                       )}
                       onPress={() =>
                         setValves((prev) =>
@@ -623,14 +763,9 @@ export default function Dashboard() {
                             v.id === selectedValveId
                               ? {
                                   ...v,
-                                  isActive: !v.isActive,
-                                  // When turning off, keep current percentage and remember it
-                                  // When turning on and percentage is 0, restore lastSetpoint (or default 50)
-                                  percentage: v.isActive
-                                    ? v.percentage
-                                    : (v.percentage ?? 0) === 0
-                                    ? v.lastSetpoint ?? 50
-                                    : v.percentage,
+                                  percentage: p,
+                                  isActive: p > 0,
+                                  lastSetpoint: p,
                                 }
                               : v
                           )
@@ -639,22 +774,87 @@ export default function Dashboard() {
                     >
                       <Text
                         className={cn(
-                          "font-semibold",
-                          selectedValve?.isActive
-                            ? "text-emerald-600"
+                          "text-sm",
+                          (selectedValve?.percentage ?? 0) === p
+                            ? "text-white"
                             : "text-slate-700"
                         )}
                       >
-                        {selectedValve?.isActive ? "ON" : "OFF"}
+                        {p}%
                       </Text>
                     </Pressable>
-                  </View>
-                </Card>
+                  ))}
+                </View>
+
+                {/* Interactive Circular Slider */}
+                <View className="items-center py-8">
+                  <CircularSlider
+                    value={selectedValve?.percentage ?? 0}
+                    onValueChange={(newValue) => {
+                      setValves((prev) =>
+                        prev.map((v) =>
+                          v.id === selectedValveId
+                            ? {
+                                ...v,
+                                percentage: newValue,
+                                isActive: newValue > 0,
+                                lastSetpoint: newValue,
+                              }
+                            : v
+                        )
+                      );
+                    }}
+                    size={170}
+                    strokeWidth={25}
+                  />
+                </View>
+              </View>
+
+              {/* Power Button */}
+              <View className="items-center">
+                <Pressable
+                  className={cn(
+                    "w-16 h-16 rounded-full items-center justify-center mb-2",
+                    selectedValve?.isActive ? "bg-green-500" : "bg-slate-300"
+                  )}
+                  onPress={() =>
+                    setValves((prev) =>
+                      prev.map((v) =>
+                        v.id === selectedValveId
+                          ? {
+                              ...v,
+                              isActive: !v.isActive,
+                              percentage: v.isActive
+                                ? v.percentage
+                                : (v.percentage ?? 0) === 0
+                                ? v.lastSetpoint ?? 50
+                                : v.percentage,
+                            }
+                          : v
+                      )
+                    )
+                  }
+                >
+                  <Power
+                    size={34}
+                    color={selectedValve?.isActive ? "white" : "gray"}
+                  />
+                </Pressable>
+                <Text
+                  className={cn(
+                    "font-semibold text-lg",
+                    selectedValve?.isActive
+                      ? "text-green-600"
+                      : "text-slate-600"
+                  )}
+                >
+                  {selectedValve?.isActive ? "ON" : "OFF"}
+                </Text>
               </View>
             </View>
-          </View>
+          </Card>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
