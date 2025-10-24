@@ -111,7 +111,7 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
       >
         {/* Modal Content positioned under notification icon */}
         <Pressable
-          className="bg-white rounded-2xl shadow-2xl"
+          className="bg-white rounded-2xl shadow-lg"
           style={{
             width: Math.min(screenWidth - 32, 350),
             maxHeight: screenHeight * 0.7,
