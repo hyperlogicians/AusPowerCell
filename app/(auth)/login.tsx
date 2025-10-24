@@ -123,12 +123,6 @@ export default function LoginScreen() {
                         autoComplete="password"
                         error={errors.password}
                       />
-                      
-                      <TouchableOpacity className="flex items-end w-full mt-3 px-3">
-                        <Text className="text-white/70 text-sm">
-                          Forgot Password?
-                        </Text>
-                      </TouchableOpacity>
 
                       <Button
                     onPress={handleLogin}
