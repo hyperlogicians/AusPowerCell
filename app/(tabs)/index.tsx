@@ -580,7 +580,7 @@ export default function Dashboard() {
         {/* Left Side - Valve Grid (60% width) */}
         <View className="flex-1" style={{ width: "60%" }}>
           <ScrollView
-            className="flex-1 px-6"
+            className="flex-1 pl-6 pr-2"
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
