@@ -51,22 +51,62 @@ export function Sidebar({ items }: SidebarProps) {
     router.push(item.route as any);
   };
 
+  // Improved route matching function
+  const isRouteActive = (itemRoute: string): boolean => {
+    // Remove trailing slashes for comparison
+    const cleanPathname = pathname.replace(/\/+$/, '');
+    const cleanRoute = itemRoute.replace(/\/+$/, '');
+
+    console.log('🔍 Debug route matching:');
+    console.log('  - Current pathname:', pathname);
+    console.log('  - Clean pathname:', cleanPathname);
+    console.log('  - Checking route:', itemRoute);
+    console.log('  - Clean route:', cleanRoute);
+
+    // Dashboard special case - match only root routes
+    if (cleanRoute === '/(tabs)') {
+      const isMatch = cleanPathname === '/(tabs)' || cleanPathname === '' || cleanPathname === '/';
+      console.log('  - Dashboard match:', isMatch);
+      return isMatch;
+    }
+
+    // For other routes, extract the actual route path (remove /(tabs) prefix)
+    const actualRoute = cleanRoute.replace(/^\/\(tabs\)/, '');
+    const exactMatch = cleanPathname === actualRoute;
+    const startsWithMatch = cleanPathname.startsWith(actualRoute + '/');
+    const isMatch = exactMatch || startsWithMatch;
+    
+    console.log('  - Actual route (no tabs):', actualRoute);
+    console.log('  - Exact match:', exactMatch);
+    console.log('  - Starts with match:', startsWithMatch);
+    console.log('  - Final match:', isMatch);
+    
+    return isMatch;
+  };
+
   return (
     <View style={{ width: sidebarWidth }}>
       {/* Navigation Items */}
       <View className="flex-1 px-6 py-8 items-center">
         <View className="gap-14">
           {items.map((item) => {
-            const isRouteActive =
-              item.route === '/(tabs)'
-                ? pathname === '/(tabs)'
-                : pathname.startsWith(item.route);
+            const isActive = isRouteActive(item.route);
             const isHovered = hoveredKey === item.key;
+            const isPressed = pressedKey === item.key;
 
             const ACTIVE_BG = 'rgba(255,255,255,0.20)';
             const PRESSED_BG = 'rgba(255,255,255,0.15)';
             const HOVER_BG = 'rgba(255,255,255,0.10)';
             const TRANSPARENT = 'transparent';
+
+            // Determine background color
+            const bgColor = isActive
+              ? ACTIVE_BG
+              : isPressed
+              ? PRESSED_BG
+              : isHovered
+              ? HOVER_BG
+              : TRANSPARENT;
 
             return (
               <Pressable
@@ -80,25 +120,17 @@ export function Sidebar({ items }: SidebarProps) {
                       onHoverOut: () => setHoveredKey(null),
                     }
                   : {})}
-                style={({ pressed }) => {
-                  const bgColor = isRouteActive
-                    ? ACTIVE_BG
-                    : pressed
-                    ? PRESSED_BG
-                    : isHovered
-                    ? HOVER_BG
-                    : TRANSPARENT;
-
-                  return {
-                    backgroundColor: bgColor,
-                    borderRadius: 16,
-                  };
+                style={{
+                  backgroundColor: bgColor,
+                  borderRadius: 16,
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
-                className={cn(
-                  'flex-row items-center justify-center px-4 py-4 rounded-2xl transition-all duration-200'
-                )}
               >
-                <IconWrapper focused={isRouteActive}>
+                <IconWrapper focused={isActive}>
                   {item.key === 'dashboard' ? (
                     <View className="rotate-180">
                       <HugeiconsIcon
@@ -128,9 +160,7 @@ export function Sidebar({ items }: SidebarProps) {
                   )}
                 </IconWrapper>
 
-                {isRouteActive && (
-                  <View className="w-2 h-2 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 ml-2" />
-                )}
+                {/* Active indicator removed to match screenshot */}
               </Pressable>
             );
           })}
