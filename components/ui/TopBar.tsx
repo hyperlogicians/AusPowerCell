@@ -6,6 +6,7 @@ import { Bell, UserRound, Wifi, SignalHigh } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { statusStore } from "../../lib/status";
 import { Logo } from "./Logo";
+import { NotificationModal } from "../NotificationModal";
 // Gradient rendered at layout level; keep TopBar transparent.
 
 function getTitle(pathname: string): string {
@@ -19,11 +20,21 @@ export function TopBar() {
   const pathname = usePathname();
   const title = getTitle(pathname);
   const [, setTick] = useState(0);
+  const [isNotificationModalVisible, setIsNotificationModalVisible] = useState(false);
 
   const buzz = () => {
     if (Platform.OS !== "web" && typeof Haptics.impactAsync === "function") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+  };
+
+  const handleNotificationPress = () => {
+    buzz();
+    setIsNotificationModalVisible(true);
+  };
+
+  const handleCloseNotificationModal = () => {
+    setIsNotificationModalVisible(false);
   };
 
   // Subscribe to status changes (wifi name + health)
@@ -103,7 +114,7 @@ export function TopBar() {
           </View>
         </View>
         <Pressable
-          onPress={buzz}
+          onPress={handleNotificationPress}
           className="w-10 h-10 rounded-xl items-center justify-center mr-3 hover:bg-white/12"
           aria-label="Notifications"
         >
@@ -116,6 +127,12 @@ export function TopBar() {
           </View>
         </Pressable>
       </View>
+      
+      {/* Notification Modal */}
+      <NotificationModal
+        visible={isNotificationModalVisible}
+        onClose={handleCloseNotificationModal}
+      />
     </View>
   );
 }
