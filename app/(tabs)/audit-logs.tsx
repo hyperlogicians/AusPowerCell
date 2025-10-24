@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card } from '../../components/ui/Card';
 import { cn } from '../../lib/utils';
 import * as Haptics from 'expo-haptics';
 import { 
   Clock,
   User,
-  Shield,
   AlertTriangle,
   CheckCircle,
   XCircle,
   Activity,
-  Filter,
-  Download,
-  Search,
-  Calendar,
   MapPin,
   Zap,
   Settings,
@@ -39,15 +33,15 @@ interface AuditLog {
 const mockLogs: AuditLog[] = [
   {
     id: '1',
-    timestamp: new Date(),
-    user: 'John Smith',
-    action: 'Emergency Shutdown Activated',
-    target: 'All Systems',
+    timestamp: new Date(Date.now() - 1200000),
+    user: 'Emily Chen',
+    action: 'User Login',
+    target: 'System Access',
     result: 'success',
-    details: 'Emergency protocol triggered - all valves closed safely',
-    ipAddress: '192.168.1.105',
-    location: 'Control Room A',
-    severity: 'critical'
+    details: 'Successful authentication from mobile device',
+    ipAddress: '192.168.1.115',
+    location: 'Remote Access',
+    severity: 'low'
   },
   {
     id: '2',
@@ -86,15 +80,15 @@ const mockLogs: AuditLog[] = [
   },
   {
     id: '5',
-    timestamp: new Date(Date.now() - 1200000),
-    user: 'Emily Chen',
-    action: 'User Login',
-    target: 'System Access',
+    timestamp: new Date(),
+    user: 'John Smith',
+    action: 'Emergency Shutdown Activated',
+    target: 'All Systems',
     result: 'success',
-    details: 'Successful authentication from mobile device',
-    ipAddress: '192.168.1.115',
-    location: 'Remote Access',
-    severity: 'low'
+    details: 'Emergency protocol triggered - all valves closed safely',
+    ipAddress: '192.168.1.105',
+    location: 'Control Room A',
+    severity: 'critical'
   }
 ];
 
@@ -107,7 +101,7 @@ export default function AuditLogs() {
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     if (Platform.OS !== 'web' && typeof Haptics.impactAsync === 'function') {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
@@ -120,235 +114,205 @@ export default function AuditLogs() {
 
   const getResultIcon = (result: string) => {
     switch (result) {
-      case 'success': return <CheckCircle size={16} color="#10b981" />;
-      case 'failed': return <XCircle size={16} color="#ef4444" />;
-      case 'pending': return <Clock size={16} color="#f59e0b" />;
-      default: return <Activity size={16} color="#64748b" />;
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'border-red-200 bg-red-50';
-      case 'high': return 'border-orange-200 bg-orange-50';
-      case 'medium': return 'border-yellow-200 bg-yellow-50';
-      default: return 'border-slate-100 bg-white';
+      case 'success': return <CheckCircle size={18} color="#10b981" />;
+      case 'failed': return <XCircle size={18} color="#ef4444" />;
+      case 'pending': return <Clock size={18} color="#f59e0b" />;
+      default: return <Activity size={18} color="#64748b" />;
     }
   };
 
   const getActionIcon = (action: string) => {
-    if (action.includes('Emergency')) return <AlertTriangle size={20} color="#ef4444" />;
-    if (action.includes('Login')) return <User size={20} color="#64748b" />;
-    if (action.includes('Configuration')) return <Settings size={20} color="#3b82f6" />;
-    if (action.includes('Maintenance')) return <Zap size={20} color="#f59e0b" />;
-    return <Activity size={20} color="#64748b" />;
+    if (action.includes('Emergency')) return <AlertTriangle size={18} color="#ef4444" />;
+    if (action.includes('Login')) return <User size={18} color="#64748b" />;
+    if (action.includes('Configuration')) return <Settings size={18} color="#3b82f6" />;
+    if (action.includes('Maintenance')) return <Zap size={18} color="#f59e0b" />;
+    return <Activity size={18} color="#64748b" />;
   };
 
   const FilterButton = ({ type, label, count }: { type: FilterType; label: string; count: number }) => (
     <Pressable
       onPress={() => setFilter(type)}
       className={cn(
-        'px-4 py-2 rounded-xl border transition-all duration-200',
+        'px-5 py-2.5 rounded-full mr-3',
         filter === type 
-          ? 'bg-blue-500 border-blue-500' 
-          : 'bg-white border-slate-200'
+          ? 'bg-[#5B8A9E]' 
+          : 'bg-white border border-[#cbd5e1]'
       )}
     >
-      <View className="flex-row items-center">
-        <Text className={cn(
-          'font-medium text-sm',
-          filter === type ? 'text-white' : 'text-slate-700'
-        )}>
-          {label}
-        </Text>
-        <View className={cn(
-          'ml-2 px-2 py-0.5 rounded-full',
-          filter === type ? 'bg-white/20' : 'bg-slate-100'
-        )}>
-          <Text className={cn(
-            'text-xs font-semibold',
-            filter === type ? 'text-white' : 'text-slate-600'
-          )}>
-            {count}
-          </Text>
-        </View>
-      </View>
+      <Text className={cn(
+        'font-medium text-sm',
+        filter === type ? 'text-white' : 'text-[#334155]'
+      )}>
+        {label} {count}
+      </Text>
     </Pressable>
   );
 
   const LogItem = ({ log, isLast }: { log: AuditLog; isLast?: boolean }) => (
     <View className="flex-row">
-      {/* Timeline */}
-      <View className="items-center mr-4">
-        <View className="w-10 h-10 rounded-full bg-white border-2 border-slate-200 items-center justify-center">
+      {/* Timeline Circle and Line */}
+      <View className="items-center mr-4" style={{ width: 40 }}>
+        <View className="w-10 h-10 rounded-full bg-white border-2 border-[#e2e8f0] items-center justify-center">
           {getActionIcon(log.action)}
         </View>
-        {!isLast && <View className="w-0.5 bg-slate-200 flex-1 mt-2" />}
+        {!isLast && (
+          <View className="w-0.5 flex-1 bg-[#e2e8f0]" style={{ minHeight: 80 }} />
+        )}
       </View>
 
-      {/* Content */}
-      <View className="flex-1 pb-6">
-        <Card variant="subtle" size="md" className={cn("border", getSeverityColor(log.severity))}>
+      {/* Content Card */}
+      <View className="flex-1 mb-6">
+        <View className="bg-white rounded-xl border border-[#e2e8f0] p-4">
           <View className="flex-row items-start justify-between mb-3">
-            <View className="flex-1">
+            <View className="flex-1 mr-2">
               <View className="flex-row items-center mb-2">
                 {getResultIcon(log.result)}
-                <Text className="text-slate-900 font-semibold text-base ml-2">{log.action}</Text>
+                <Text className="text-[#1e293b] font-semibold text-base ml-2">{log.action}</Text>
               </View>
-              <Text className="text-slate-600 text-sm mb-1">{log.target}</Text>
-              <Text className="text-slate-500 text-sm">{log.details}</Text>
+              <Text className="text-[#475569] text-sm font-medium mb-1">{log.target}</Text>
+              <Text className="text-[#64748b] text-sm">{log.details}</Text>
             </View>
-            <Pressable className="w-8 h-8 rounded-lg bg-slate-50 items-center justify-center">
-              <MoreHorizontal size={16} color="#64748b" />
+            <Pressable className="w-6 h-6 items-center justify-center">
+              <MoreHorizontal size={16} color="#94a3b8" />
             </Pressable>
           </View>
 
-          <View className="border-t border-slate-100 pt-3">
-            <View className="flex-row items-center justify-between">
+          <View className="border-t border-[#f1f5f9] pt-3">
+            <View className="flex-row items-center justify-between mb-1.5">
               <View className="flex-row items-center">
                 <User size={14} color="#64748b" />
-                <Text className="text-slate-600 text-sm ml-1">{log.user}</Text>
+                <Text className="text-[#475569] text-xs font-medium ml-1.5">{log.user}</Text>
               </View>
-              <View className="flex-row items-center">
-                <Clock size={14} color="#64748b" />
-                <Text className="text-slate-600 text-sm ml-1">
-                  {log.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Text>
-              </View>
+              <Text className="text-[#64748b] text-xs">
+                {log.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
             </View>
             {log.location && (
-              <View className="flex-row items-center mt-2">
+              <View className="flex-row items-center">
                 <MapPin size={14} color="#64748b" />
-                <Text className="text-slate-600 text-sm ml-1">{log.location}</Text>
-                <Text className="text-slate-400 text-sm ml-2">• {log.ipAddress}</Text>
+                <Text className="text-[#475569] text-xs ml-1.5">{log.location}</Text>
+                <Text className="text-[#94a3b8] text-xs ml-1.5">• {log.ipAddress}</Text>
               </View>
             )}
           </View>
-        </Card>
+        </View>
       </View>
     </View>
   );
 
   return (
-      <SafeAreaView className="flex-1" edges={['top']}>
-        <ScrollView
-        className="flex-1 px-6"
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
+    <SafeAreaView className="flex-1 bg-[#f8fafc]" edges={['top']}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
             tintColor="#64748b"
             colors={['#64748b']}
-            />
-          }
-        >
-        <View className="py-6">
-            {/* Header */}
-          <View className="flex-row items-center justify-between mb-8">
+          />
+        }
+      >
+        <View className="px-12 py-8">
+          {/* Header with Stats */}
+          <View className="flex-row items-start justify-between mb-10">
+            {/* Title Section */}
             <View className="flex-1">
-              <Text className="text-slate-900 text-3xl font-bold mb-2">
-                Audit Trail
+              <Text className="text-[#0f172a] text-4xl font-bold mb-2">
+                Audit Logs
               </Text>
-              <Text className="text-slate-600 text-base">
+              <Text className="text-[#64748b] text-base">
                 Track all system activities and user actions
               </Text>
             </View>
-            <View className="flex-row space-x-2">
-              <Pressable className="w-12 h-12 rounded-2xl bg-white border border-slate-200 items-center justify-center">
-                <Search size={20} color="#64748b" />
-              </Pressable>
-              <Pressable className="w-12 h-12 rounded-2xl bg-white border border-slate-200 items-center justify-center">
-                <Download size={20} color="#64748b" />
-              </Pressable>
-            </View>
-            </View>
 
-          {/* Stats Row */}
-          <View className="flex-row space-x-4 mb-6">
-            <Card variant="subtle" size="sm" className="flex-1 bg-white border border-slate-100">
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-slate-900">{mockLogs.length}</Text>
-                <Text className="text-slate-600 text-sm">Total Events</Text>
+            {/* Stats Boxes */}
+            <View className="flex-row ml-8">
+              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center mr-4" style={{ minWidth: 140 }}>
+                <Text className="text-[#0f172a] text-5xl font-bold">{mockLogs.length}</Text>
+                <Text className="text-[#64748b] text-sm font-medium mt-2">Total events</Text>
               </View>
-            </Card>
-            <Card variant="subtle" size="sm" className="flex-1 bg-white border border-slate-100">
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-emerald-600">
+              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center mr-4" style={{ minWidth: 140 }}>
+                <Text className="text-[#10b981] text-5xl font-bold">
                   {mockLogs.filter(l => l.result === 'success').length}
-                    </Text>
-                <Text className="text-slate-600 text-sm">Successful</Text>
+                </Text>
+                <Text className="text-[#64748b] text-sm font-medium mt-2">Successful</Text>
               </View>
-            </Card>
-            <Card variant="subtle" size="sm" className="flex-1 bg-white border border-slate-100">
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-red-600">
+              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center mr-4" style={{ minWidth: 140 }}>
+                <Text className="text-[#ef4444] text-5xl font-bold">
                   {mockLogs.filter(l => l.severity === 'critical').length}
-                    </Text>
-                <Text className="text-slate-600 text-sm">Critical</Text>
+                </Text>
+                <Text className="text-[#64748b] text-sm font-medium mt-2">Critical</Text>
               </View>
-            </Card>
+              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center" style={{ minWidth: 140 }}>
+                <Text className="text-[#0f172a] text-5xl font-bold">
+                  {mockLogs.filter(l => l.result === 'failed').length}
+                </Text>
+                <Text className="text-[#64748b] text-sm font-medium mt-2">Failed</Text>
+              </View>
+            </View>
           </View>
 
           {/* Filters */}
-          <View className="mb-6">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row space-x-3">
-              <FilterButton 
-                type="all" 
-                label="All Events" 
-                count={mockLogs.length}
-              />
-              <FilterButton 
-                type="success" 
-                label="Success" 
-                count={mockLogs.filter(l => l.result === 'success').length}
-              />
-              <FilterButton 
-                type="failed" 
-                label="Failed" 
-                count={mockLogs.filter(l => l.result === 'failed').length}
-              />
-              <FilterButton 
-                type="pending" 
-                label="Pending" 
-                count={mockLogs.filter(l => l.result === 'pending').length}
-              />
-              <FilterButton 
-                type="critical" 
-                label="Critical" 
-                count={mockLogs.filter(l => l.severity === 'critical').length}
-              />
+          <View className="mb-8">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row">
+                <FilterButton 
+                  type="all" 
+                  label="All Events" 
+                  count={mockLogs.length}
+                />
+                <FilterButton 
+                  type="success" 
+                  label="Success" 
+                  count={mockLogs.filter(l => l.result === 'success').length}
+                />
+                <FilterButton 
+                  type="failed" 
+                  label="Failed" 
+                  count={mockLogs.filter(l => l.result === 'failed').length}
+                />
+                <FilterButton 
+                  type="critical" 
+                  label="Critical" 
+                  count={mockLogs.filter(l => l.severity === 'critical').length}
+                />
+                <FilterButton 
+                  type="pending" 
+                  label="Pending" 
+                  count={mockLogs.filter(l => l.result === 'pending').length}
+                />
+              </View>
             </ScrollView>
           </View>
 
-          {/* Timeline */}
-            <View>
-            <Text className="text-slate-900 text-xl font-semibold mb-6">
-                Activity Timeline ({filteredLogs.length})
-              </Text>
-              
-              {filteredLogs.length === 0 ? (
-              <Card variant="subtle" size="lg" className="bg-white border border-slate-100">
-                <View className="items-center py-8">
-                  <Eye size={48} color="#94a3b8" />
-                  <Text className="text-slate-500 text-lg font-medium mt-4">No events found</Text>
-                  <Text className="text-slate-400 text-sm">Try adjusting your filters</Text>
-                </View>
-                </Card>
-              ) : (
-                <View>
-                  {filteredLogs.map((log, index) => (
-                    <LogItem
-                      key={log.id}
-                      log={log}
-                      isLast={index === filteredLogs.length - 1}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
+          {/* Activity Timeline */}
+          <View>
+            <Text className="text-[#0f172a] text-2xl font-bold mb-6">
+              Activity Timeline
+            </Text>
+            
+            {filteredLogs.length === 0 ? (
+              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-6 py-16 items-center">
+                <Eye size={48} color="#94a3b8" />
+                <Text className="text-[#64748b] text-lg font-semibold mt-4">No events found</Text>
+                <Text className="text-[#94a3b8] text-sm mt-1">Try adjusting your filters</Text>
+              </View>
+            ) : (
+              <View>
+                {filteredLogs.map((log, index) => (
+                  <LogItem
+                    key={log.id}
+                    log={log}
+                    isLast={index === filteredLogs.length - 1}
+                  />
+                ))}
+              </View>
+            )}
           </View>
-        </ScrollView>
-      </SafeAreaView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
