@@ -133,7 +133,7 @@ export default function AuditLogs() {
     <Pressable
       onPress={() => setFilter(type)}
       className={cn(
-        'px-5 py-2.5 rounded-full mr-3',
+        'px-4 py-2 rounded-2xl mr-3',
         filter === type 
           ? 'bg-[#5B8A9E]' 
           : 'bg-white border border-[#cbd5e1]'
@@ -152,17 +152,17 @@ export default function AuditLogs() {
     <View className="flex-row">
       {/* Timeline Circle and Line */}
       <View className="items-center mr-4" style={{ width: 40 }}>
-        <View className="w-10 h-10 rounded-full bg-white border-2 border-[#e2e8f0] items-center justify-center">
+        <View className="w-10 h-10 rounded-full bg-white border-2 border-[#b4b4b4] items-center justify-center">
           {getActionIcon(log.action)}
         </View>
         {!isLast && (
-          <View className="w-0.5 flex-1 bg-[#e2e8f0]" style={{ minHeight: 80 }} />
+          <View className="w-[1.5px] flex-1 bg-[#d4d4d4]" style={{ minHeight: 80 }} />
         )}
       </View>
 
       {/* Content Card */}
       <View className="flex-1 mb-6">
-        <View className="bg-white rounded-xl border border-[#e2e8f0] p-4">
+        <View className="bg-white rounded-3xl border-2 border-[#b4b4b4] p-4">
           <View className="flex-row items-start justify-between mb-3">
             <View className="flex-1 mr-2">
               <View className="flex-row items-center mb-2">
@@ -203,7 +203,7 @@ export default function AuditLogs() {
   return (
     <SafeAreaView className="flex-1 bg-[#f8fafc]" edges={['top']}>
       <ScrollView
-        className="flex-1"
+        className="flex-1 px-6"
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -214,42 +214,42 @@ export default function AuditLogs() {
           />
         }
       >
-        <View className="px-12 py-8">
+        <View className="py-10">
           {/* Header with Stats */}
-          <View className="flex-row items-start justify-between mb-10">
+          <View className="flex-row items-start justify-between mb-6">
             {/* Title Section */}
             <View className="flex-1">
-              <Text className="text-[#0f172a] text-4xl font-bold mb-2">
-                Audit Logs
-              </Text>
-              <Text className="text-[#64748b] text-base">
-                Track all system activities and user actions
-              </Text>
-            </View>
+                <Text className="text-slate-900 text-3xl mb-1">
+                  Audit Logs
+                </Text>
+                <Text className="text-slate-600 text-base">
+                  Track all system activities and user actions
+                </Text>
+              </View>
 
             {/* Stats Boxes */}
             <View className="flex-row ml-8">
-              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center mr-4" style={{ minWidth: 140 }}>
-                <Text className="text-[#0f172a] text-5xl font-bold">{mockLogs.length}</Text>
-                <Text className="text-[#64748b] text-sm font-medium mt-2">Total events</Text>
+              <View className="bg-white rounded-2xl border border-[#9ea2a7] px-4 py-3 mr-4 flex-col justify-between" style={{ minWidth: 140 }}>
+                <Text className="text-[#0f172a] text-5xl text-left">{mockLogs.length}</Text>
+                <Text className="text-[#414a58] text-xs mt-2 text-right">Total events</Text>
               </View>
-              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center mr-4" style={{ minWidth: 140 }}>
-                <Text className="text-[#10b981] text-5xl font-bold">
+              <View className="bg-white rounded-2xl border border-[#9ea2a7] px-4 py-3 mr-4 flex-col justify-between" style={{ minWidth: 140 }}>
+                <Text className="text-[#2f9b77] text-5xl text-left">
                   {mockLogs.filter(l => l.result === 'success').length}
                 </Text>
-                <Text className="text-[#64748b] text-sm font-medium mt-2">Successful</Text>
+                <Text className="text-[#414a58] text-xs mt-2 text-right">Successful</Text>
               </View>
-              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center mr-4" style={{ minWidth: 140 }}>
-                <Text className="text-[#ef4444] text-5xl font-bold">
+              <View className="bg-white rounded-2xl border border-[#9ea2a7] px-4 py-3 mr-4 flex-col justify-between" style={{ minWidth: 140 }}>
+                <Text className="text-[#b73434] text-5xl text-left">
                   {mockLogs.filter(l => l.severity === 'critical').length}
                 </Text>
-                <Text className="text-[#64748b] text-sm font-medium mt-2">Critical</Text>
+                <Text className="text-[#414a58] text-xs mt-2 text-right">Critical</Text>
               </View>
-              <View className="bg-white rounded-2xl border border-[#e2e8f0] px-8 py-6 items-center" style={{ minWidth: 140 }}>
-                <Text className="text-[#0f172a] text-5xl font-bold">
+              <View className="bg-white rounded-2xl border border-[#9ea2a7] px-4 py-3 flex-col justify-between" style={{ minWidth: 140 }}>
+                <Text className="text-[#0f172a] text-5xl text-left">
                   {mockLogs.filter(l => l.result === 'failed').length}
                 </Text>
-                <Text className="text-[#64748b] text-sm font-medium mt-2">Failed</Text>
+                <Text className="text-[#414a58] text-xs mt-2 text-right">Failed</Text>
               </View>
             </View>
           </View>
@@ -289,7 +289,7 @@ export default function AuditLogs() {
 
           {/* Activity Timeline */}
           <View>
-            <Text className="text-[#0f172a] text-2xl font-bold mb-6">
+            <Text className="text-[#0f172a] text-xl font-medium mb-6">
               Activity Timeline
             </Text>
             
