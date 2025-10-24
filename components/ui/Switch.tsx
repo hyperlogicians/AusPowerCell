@@ -43,7 +43,7 @@ export function Switch({
 
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['rgba(255, 255, 255, 0.3)', '#3B82F6'],
+    outputRange: ['#8E9BA6','#5A6E80'],
   });
 
   return (
