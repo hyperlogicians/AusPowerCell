@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { View, Pressable, useWindowDimensions, Platform } from 'react-native';
+import { View, Pressable, useWindowDimensions, Platform, Image } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { cn } from '../../lib/utils';
 import * as Haptics from 'expo-haptics';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import {
-  BreastPumpIcon,
   Audit01Icon,
   UserMultipleIcon,
   Settings01Icon,
@@ -132,13 +131,14 @@ export function Sidebar({ items }: SidebarProps) {
               >
                 <IconWrapper focused={isActive}>
                   {item.key === 'dashboard' ? (
-                    <View className="rotate-180">
-                      <HugeiconsIcon
-                        icon={BreastPumpIcon}
-                        size={28}
-                        color="white"
-                      />
-                    </View>
+                    <Image 
+                      source={require('../../public/valve.png')} 
+                      style={{ 
+                        width: 34, 
+                        height: 34
+                      }}
+                      resizeMode="contain"
+                    />
                   ) : item.key === 'audit-logs' ? (
                     <HugeiconsIcon
                       icon={Audit01Icon}
@@ -178,7 +178,7 @@ export const sidebarItems: SidebarItem[] = [
   {
     key: 'dashboard',
     label: 'Dashboard',
-    icon: BreastPumpIcon,
+    icon: () => null, // Icon is handled in the component
     route: '/(tabs)',
   },
   {
