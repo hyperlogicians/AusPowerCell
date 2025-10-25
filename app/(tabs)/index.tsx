@@ -18,7 +18,7 @@ import { cn } from "../../lib/utils";
 import * as Haptics from "expo-haptics";
 import Svg, { G, Circle as SvgCircle, Path, Line } from "react-native-svg";
 import {
-  Gauge,
+  CircleGaugeIcon,
   TrendingUp,
   Droplets,
   Clock,
@@ -741,21 +741,12 @@ export default function Dashboard() {
               {/* Key Metrics Section */}
               <View className="flex-row justify-between mb-6">
                 <View className="items-center flex-1">
-                  <Clock size={20} color="black" className="opacity-75" />
+                  <CircleGaugeIcon size={20} color="black" className="opacity-75" />
                   <Text className="text-slate-900 text-xl font-medium mt-2">
                     {selectedValve?.percentage ?? 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>%</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
                     Valve Open
-                  </Text>
-                </View>
-                <View className="items-center flex-1">
-                  <Gauge size={20} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-xl font-medium mt-2">
-                    {selectedValve?.pressure || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>PSI</span>
-                  </Text>
-                  <Text className="text-slate-600 text-xs mt-1">
-                    Water Pressure
                   </Text>
                 </View>
                 <View className="items-center flex-1">

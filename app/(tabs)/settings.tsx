@@ -7,6 +7,7 @@ import {
   TextInput,
   Image,
   Dimensions,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Switch } from "../../components/ui/Switch";
@@ -19,9 +20,10 @@ import {
   Bell,
   Camera,
   RefreshCw,
+  MapPin,
 } from "lucide-react-native";
 
-type SettingView = "account" | "devices" | "notifications";
+type SettingView = "account" | "devices" | "notifications" | "siteManagement";
 
 interface Device {
   id: string;
@@ -35,6 +37,8 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState("John L.");
   const [deviceOfflineNotif, setDeviceOfflineNotif] = useState(true);
   const [valveNotif, setValveNotif] = useState(true);
+  const [selectedSite, setSelectedSite] = useState<string>("1");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Get screen dimensions for responsive design
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -102,6 +106,15 @@ export default function Settings() {
       deviceId: "APC-20N-09",
       status: "online",
     },
+  ];
+
+  const sites = [
+    { id: "1", name: "Main Campus", location: "Building A, Floor 1" },
+    { id: "2", name: "North Wing", location: "Building B, Floor 2" },
+    { id: "3", name: "South Wing", location: "Building C, Floor 1" },
+    { id: "4", name: "East Campus", location: "Building D, Floor 3" },
+    { id: "5", name: "West Campus", location: "Building E, Floor 2" },
+    { id: "6", name: "Research Center", location: "Building F, Floor 1" },
   ];
 
   const getStatusColor = (status: string) => {
@@ -366,6 +379,94 @@ export default function Settings() {
     </View>
   );
 
+  const renderSiteManagementView = () => (
+    <View className="flex-1">
+      <Text
+        className="font-semibold mb-6 text-xl text-black/70 border-b border-black/10 pb-6"
+      >
+        Site Management
+      </Text>
+
+      <View className="mb-8">
+        <Text className="text-[#676c77] font-medium text-sm">
+          Current Site
+        </Text>
+        
+        <View className="my-4">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-sky-800 font-semibold text-lg">
+                {sites.find(site => site.id === selectedSite)?.name}
+              </Text>
+              <Text className="text-sky-600 text-sm mt-1">
+                {sites.find(site => site.id === selectedSite)?.location}
+              </Text>
+            </View>
+            <Button
+              onPress={() => setIsDropdownOpen(true)}
+              className="bg-sky-800/20 rounded-xl border border-sky-800/20 px-4 py-2"
+            >
+              <Text className="text-black/70 font-regular">Change Site</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
+
+
+      {/* Dropdown Modal */}
+      <Modal
+        visible={isDropdownOpen}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsDropdownOpen(false)}
+      >
+        <Pressable 
+          className="flex-1 bg-black/50 justify-center items-center px-4"
+          onPress={() => setIsDropdownOpen(false)}
+        >
+          <View className="bg-white rounded-2xl shadow-lg w-full max-w-md">
+            <View className="p-4 border-b border-gray-200">
+              <Text className="text-lg font-semibold text-gray-900">Select Site</Text>
+            </View>
+            <ScrollView className="max-h-80">
+              {sites.map((site, index) => (
+                <Pressable
+                  key={site.id}
+                  className={cn(
+                    "px-4 py-4 border-b border-gray-100",
+                    selectedSite === site.id ? "bg-sky-50" : "bg-white"
+                  )}
+                  onPress={() => {
+                    setSelectedSite(site.id);
+                    setIsDropdownOpen(false);
+                  }}
+                >
+                  <Text className={cn(
+                    "font-medium text-base",
+                    selectedSite === site.id ? "text-sky-800" : "text-gray-900"
+                  )}>
+                    {site.name}
+                  </Text>
+                  <Text className="text-gray-500 text-sm mt-1">
+                    {site.location}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <View className="p-4 border-t border-gray-200">
+              <Pressable
+                className="bg-gray-100 rounded-xl py-3"
+                onPress={() => setIsDropdownOpen(false)}
+              >
+                <Text className="text-center font-medium text-gray-700">Cancel</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-[#f9fafb]" edges={["top"]}>
       {/* Page Header (outside cards) */}
@@ -468,6 +569,33 @@ export default function Settings() {
                 Notification
               </Text>
             </Pressable>
+
+            <Pressable
+              onPress={() => setSelectedView("siteManagement")}
+              className={cn(
+                "flex-row items-center rounded-2xl px-4 py-4 border border-transparent",
+                selectedView === "siteManagement"
+                  ? "bg-sky-800/20 border-sky-800/20"
+                  : "bg-transparent"
+              )}
+            >
+              <MapPin
+                size={isLargeTablet ? 24 : isTablet ? 22 : 20}
+                color="#2d3748"
+              />
+              <Text
+                className={cn(
+                  "font-medium ml-3",
+                  isLargeTablet
+                    ? "text-[#2d3748] text-lg"
+                    : isTablet
+                    ? "text-[#2d3748] text-base"
+                    : "text-[#2d3748] text-base"
+                )}
+              >
+                Site Management
+              </Text>
+            </Pressable>
           </View>
         </View>
 
@@ -488,6 +616,7 @@ export default function Settings() {
           {selectedView === "account" && renderAccountView()}
           {selectedView === "devices" && renderDevicesView()}
           {selectedView === "notifications" && renderNotificationsView()}
+          {selectedView === "siteManagement" && renderSiteManagementView()}
         </View>
       </View>
     </SafeAreaView>

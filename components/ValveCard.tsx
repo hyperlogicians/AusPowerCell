@@ -229,17 +229,6 @@ export function ValveCard({
             </Text>
           </View>
 
-          {/* Pressure */}
-          <View className="flex-1 items-center">
-            <Gauge size={20} color="black" />
-            <Text className={cn(
-              'text-xs font-medium mt-1',
-              valve.isOnline && valve.pressure ? 'text-black' : 'text-gray-500'
-            )}>
-              {valve.isOnline && valve.pressure ? `${valve.pressure} PSI` : '- PSI'}
-            </Text>
-          </View>
-
           {/* Flow Rate */}
           <View className="flex-1 items-center">
             <Droplets size={20} color="black" />
