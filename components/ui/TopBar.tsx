@@ -1,12 +1,11 @@
 import React from "react";
-import { View, Text, Pressable, Image, Platform } from "react-native";
+import { View, Text, Pressable, Image, Platform, Animated, Dimensions } from "react-native";
 import { usePathname } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { Bell, UserRound, Wifi, SignalHigh } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { Bell, UserRound, Wifi, Radio, LogOut } from "lucide-react-native";
+import { useEffect, useState, useRef } from "react";
 import { statusStore } from "../../lib/status";
-import { Logo } from "./Logo";
-// Gradient rendered at layout level; keep TopBar transparent.
+import { NotificationModal } from "../NotificationModal";
 
 function getTitle(pathname: string): string {
   if (pathname.includes("/audit-logs")) return "Audit Logs";
@@ -15,15 +14,84 @@ function getTitle(pathname: string): string {
   return "Dashboard";
 }
 
+const { width: screenWidth } = Dimensions.get("window");
+
 export function TopBar() {
   const pathname = usePathname();
   const title = getTitle(pathname);
   const [, setTick] = useState(0);
+  const [isNotificationModalVisible, setIsNotificationModalVisible] = useState(false);
+  const [isUserProfileExpanded, setIsUserProfileExpanded] = useState(false);
+  
+  // User data
+  const userName = "John L.";
+  const baseWidth = 40; // Avatar width
+  const nameWidth = userName.length * 8 + 10; // Approximate width per character + padding
+  const logoutButtonWidth = 30; // Logout button width
+  const padding = 20; // Total padding
+  const expandedWidth = baseWidth + nameWidth + logoutButtonWidth + padding;
+  
+  // Animation values
+  const expandAnimation = useRef(new Animated.Value(0)).current;
+  const slideAnimation = useRef(new Animated.Value(0)).current;
 
   const buzz = () => {
     if (Platform.OS !== "web" && typeof Haptics.impactAsync === "function") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+  };
+
+  const handleNotificationPress = () => {
+    buzz();
+    setIsNotificationModalVisible(true);
+  };
+
+  const handleCloseNotificationModal = () => {
+    setIsNotificationModalVisible(false);
+  };
+
+  const handleUserProfilePress = () => {
+    buzz();
+    if (isUserProfileExpanded) {
+      // Close animation
+      Animated.parallel([
+        Animated.timing(expandAnimation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(slideAnimation, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+      ]).start(() => {
+        setIsUserProfileExpanded(false);
+      });
+    } else {
+      // Open animation
+      setIsUserProfileExpanded(true);
+      Animated.parallel([
+        Animated.timing(expandAnimation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(slideAnimation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  };
+
+  const handleLogout = () => {
+    buzz();
+    // Add logout logic here
+    console.log("Logout pressed");
+    // Close the profile button
+    handleUserProfilePress();
   };
 
   // Subscribe to status changes (wifi name + health)
@@ -43,11 +111,11 @@ export function TopBar() {
           const type =
             (state?.type && String(state.type).toUpperCase()) || undefined;
           const isConnected = state?.isConnected ?? true;
-          const label = isConnected ? ssid || type || "Wi‑Fi" : "Offline";
+          const label = isConnected ? ssid || type || "AusWIFI" : "Offline";
           statusStore.setWifiName(label);
         }
       } catch (e) {
-        if (!statusStore.wifiName) statusStore.setWifiName("Wi‑Fi");
+        if (!statusStore.wifiName) statusStore.setWifiName("AusWIFI");
       }
     };
 
@@ -60,7 +128,16 @@ export function TopBar() {
   }, []);
 
   return (
-    <View className="px-6 pt-6 pb-4 flex-row items-center justify-between bg-transparent">
+    <>
+      {/* Backdrop for outside click detection */}
+      {isUserProfileExpanded && (
+        <Pressable
+          className="absolute inset-0 z-10"
+          onPress={handleUserProfilePress}
+        />
+      )}
+      
+      <View className="px-6 pt-6 pb-4 flex-row items-center justify-between bg-transparent">
       {/* Left: Logo + Title */}
       <View className="flex-row items-center justify-center ml-2">
         <Image
@@ -74,48 +151,116 @@ export function TopBar() {
       </View>
 
       {/* Right: Actions */}
-      <View className="flex-row items-center space-x-5">
-        {/* Connection + Status */}
-        <View className="flex-row mr-3 space-x-10">
-          <View>
-            <SignalHigh
-              size={16}
-              color={
-                statusStore.systemHealth === "good"
-                  ? "#34d399"
-                  : statusStore.systemHealth === "medium"
-                  ? "#f59e0b"
-                  : "#ef4444"
-              }
-              className="w-full justify-start"
-            />
-            <Text className="text-white/90 text-sm leading-4 capitalize">
-              {statusStore.systemHealth}
-            </Text>
-            <Text className="text-white/60 text-[10px]">Status</Text>
-          </View>
-          <View>
-            <Wifi size={16} color="#34d399" />
-            <Text className="text-white/90 text-sm leading-4">
-              {statusStore.wifiName || "Wi‑Fi"}
-            </Text>
-            <Text className="text-white/60 text-[10px]">Network</Text>
-          </View>
-        </View>
-        <Pressable
-          onPress={buzz}
-          className="w-10 h-10 rounded-xl items-center justify-center mr-3 hover:bg-white/12"
-          aria-label="Notifications"
+      <View className="flex-row items-center">
+        {/* Connection + Status - Animated slide */}
+        <Animated.View 
+          className="flex-row mr-8"
+          style={{
+            transform: [{
+              translateX: slideAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -15], // Slide left when expanding
+              })
+            }]
+          }}
         >
-          <View className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-2 right-2" />
-          <Bell size={18} color="#ffffff" />
-        </Pressable>
-        <Pressable onPress={buzz} className="flex-row items-center">
-          <View className="w-10 h-10 rounded-full bg-blue-100 border border-[#4B4B4B] items-center justify-center">
-            <UserRound size={18} color="#4B4B4B" />
+          <View>
+            <Wifi size={18} color="#34d399" />
+            <Text className="text-white/90 text-lg mt-1 leading-4">
+              {statusStore.wifiName || "AusWIFI"}
+            </Text>
+            <Text className="text-white/60 text-[10px] text-right">Network</Text>
           </View>
-        </Pressable>
+        </Animated.View>
+
+        {/* Notification Bell - Animated slide */}
+        <Animated.View
+          style={{
+            transform: [{
+              translateX: slideAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -15], // Slide left when expanding
+              })
+            }]
+          }}
+        >
+          <Pressable
+            onPress={handleNotificationPress}
+            className="w-10 h-10 rounded-xl items-center justify-center mr-8 hover:bg-white/12"
+            aria-label="Notifications"
+          >
+            <View className="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-2 right-2" />
+            <Bell size={18} color="#ffffff" />
+          </Pressable>
+        </Animated.View>
+
+        {/* User Profile Button - Expanding */}
+        <View className="relative">
+          <Animated.View
+            style={{
+              width: expandAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [baseWidth, expandedWidth], // Dynamic width based on name length
+              }),
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: 'white',
+              overflow: 'hidden',
+            }}
+          >
+            <Pressable
+              onPress={handleUserProfilePress}
+              className="flex-row items-center h-full"
+            >
+              {/* User Icon - Appears later in animation */}
+              <Animated.View 
+                className="w-10 h-10 rounded-full bg-blue-100 border border-[#4B4B4B] items-center justify-center"
+                style={{
+                  transform: [{
+                    scale: expandAnimation.interpolate({
+                      inputRange: [0, 0.4, 0.8, 1],
+                      outputRange: [1, 0.9, 0.7, 0.8], // Scale down then back up
+                    })
+                  }]
+                }}
+              >
+                <UserRound size={16} color="#4B4B4B" />
+              </Animated.View>
+              
+              {/* User Name and Logout - Only visible when expanded */}
+              <Animated.View
+                className="flex-row items-center ml-3"
+                style={{
+                  opacity: expandAnimation,
+                  transform: [{
+                    translateX: expandAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-50, 0], // Slide in from left
+                    })
+                  }]
+                }}
+              >
+                <Text className="text-gray-800 text-sm font-medium mr-3">
+                  {userName}
+                </Text>
+                <Pressable
+                  onPress={handleLogout}
+                  className="items-center justify-center border-l border-gray-300 pl-3"
+                >
+                  <LogOut size={16} color="#6b7280" />
+                </Pressable>
+              </Animated.View>
+            </Pressable>
+          </Animated.View>
+        </View>
       </View>
-    </View>
+      
+        {/* Notification Modal */}
+        <NotificationModal
+          visible={isNotificationModalVisible}
+          onClose={handleCloseNotificationModal}
+        />
+      </View>
+    </>
   );
 }

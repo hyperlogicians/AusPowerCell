@@ -23,7 +23,6 @@ import {
   Clock,
   MapPin,
   CirclePower,
-  Power,
 } from "lucide-react-native";
 import { statusStore } from "../../lib/status";
 import { HugeiconsIcon } from "@hugeicons/react-native";
@@ -569,7 +568,7 @@ export default function Dashboard() {
           }}
           pointerEvents="none"
         >
-          <Text className="text-slate-900 text-2xl font-bold">{value}%</Text>
+          <Text className="text-slate-900 text-xl font-medium">{value}<span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>%</span></Text>
         </View>
       </View>
     );
@@ -581,7 +580,7 @@ export default function Dashboard() {
         {/* Left Side - Valve Grid (60% width) */}
         <View className="flex-1" style={{ width: "60%" }}>
           <ScrollView
-            className="flex-1 px-6"
+            className="flex-1 pl-6 pr-2"
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
@@ -671,7 +670,7 @@ export default function Dashboard() {
             )}
           >
             {/* Header Section with Icon, Title, ID and Status */}
-            <View className="p-6">
+            <View className="p-2">
               <View className="flex-row items-start justify-between mb-4">
                 <View className="flex-1">
                   {/* Icon and Title */}
@@ -679,12 +678,12 @@ export default function Dashboard() {
                     <View className="rotate-180 mr-3">
                       <HugeiconsIcon
                         icon={BreastPumpIcon}
-                        size={62}
+                        size={55}
                         color="green"
                       />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-slate-900 font-semibold text-3xl mb-1">
+                      <Text className="text-slate-900 font-semibold text-2xl mb-1">
                         {selectedValve?.name}
                       </Text>
                       <Text className="text-slate-600 text-sm">APC-20N-02</Text>
@@ -692,9 +691,9 @@ export default function Dashboard() {
                   </View>
 
                   {/* Status */}
-                  <View className="flex-row items-center justify-between mb-3">
+                  <View className="flex-row items-center justify-between mb-2">
                     {/* Location */}
-                    <View className="flex-row items-center mt-6">
+                    <View className="flex-row items-center mt-4">
                       <MapPin size={20} color="gray" />
                       <Text className="text-gray-600 text-sm ml-2">
                         {selectedValve?.location || "North Side, Sector 1"}
@@ -716,8 +715,8 @@ export default function Dashboard() {
               {/* Key Metrics Section */}
               <View className="flex-row justify-between mb-6">
                 <View className="items-center flex-1">
-                  <Clock size={24} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-2xl font-medium mt-2">
+                  <Clock size={20} color="black" className="opacity-75" />
+                  <Text className="text-slate-900 text-xl font-medium mt-2">
                     {selectedValve?.percentage ?? 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>%</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
@@ -725,8 +724,8 @@ export default function Dashboard() {
                   </Text>
                 </View>
                 <View className="items-center flex-1">
-                  <Gauge size={24} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-2xl font-medium mt-2">
+                  <Gauge size={20} color="black" className="opacity-75" />
+                  <Text className="text-slate-900 text-xl font-medium mt-2">
                     {selectedValve?.pressure || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>PSI</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
@@ -734,8 +733,8 @@ export default function Dashboard() {
                   </Text>
                 </View>
                 <View className="items-center flex-1">
-                  <Droplets size={24} color="black" className="opacity-75" />
-                  <Text className="text-slate-900 text-2xl font-medium mt-2">
+                  <Droplets size={20} color="black" className="opacity-75" />
+                  <Text className="text-slate-900 text-xl font-medium mt-2">
                     {selectedValve?.flowRate || 0} <span style={{ fontSize: 16, opacity: 0.75, fontWeight: 'normal' }}>L/min</span>
                   </Text>
                   <Text className="text-slate-600 text-xs mt-1">
@@ -745,10 +744,10 @@ export default function Dashboard() {
               </View>
 
               {/* Circular Slider Section */}
-              <View className="bg-white border border-slate-400 rounded-3xl p-6 mb-6">
+              <View className="bg-white border border-slate-400 rounded-3xl p-4 mb-6">
                 {/* Presets */}
                 <View className="flex-row mb-4">
-                  {[0, 25, 50, 75, 100].map((p) => (
+                  {[25, 50, 75].map((p) => (
                     <Pressable
                       key={p}
                       className={cn(
@@ -787,7 +786,7 @@ export default function Dashboard() {
                 </View>
 
                 {/* Interactive Circular Slider */}
-                <View className="items-center py-8">
+                <View className="items-center py-4">
                   <CircularSlider
                     value={selectedValve?.percentage ?? 0}
                     onValueChange={(newValue) => {
@@ -804,7 +803,7 @@ export default function Dashboard() {
                         )
                       );
                     }}
-                    size={170}
+                    size={140}
                     strokeWidth={25}
                   />
                 </View>
@@ -814,8 +813,7 @@ export default function Dashboard() {
               <View className="items-center">
                 <Pressable
                   className={cn(
-                    "w-16 h-16 rounded-full items-center justify-center mb-2",
-                    selectedValve?.isActive ? "bg-green-500" : "bg-slate-300"
+                    "w-10 h-10 rounded-full items-center justify-center mb-2 bg-transparent"
                   )}
                   onPress={() =>
                     setValves((prev) =>
@@ -835,14 +833,14 @@ export default function Dashboard() {
                     )
                   }
                 >
-                  <Power
-                    size={34}
-                    color={selectedValve?.isActive ? "white" : "gray"}
+                  <CirclePower
+                    size={40}
+                    color={selectedValve?.isActive ? "green" : "darkGray"}
                   />
                 </Pressable>
                 <Text
                   className={cn(
-                    "font-semibold text-lg",
+                    "font-semibold text-base",
                     selectedValve?.isActive
                       ? "text-green-600"
                       : "text-slate-600"

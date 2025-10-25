@@ -105,7 +105,7 @@ export function ValveCard({
 
   return (
     <View className={cn(
-      'rounded-3xl overflow-hidden shadow-sm',
+      'rounded-[26px] overflow-hidden shadow-sm',
       theme.background,
       isSelected ? 'border-2 border-black/40' : theme.border,
       'border',
@@ -126,7 +126,7 @@ export function ValveCard({
       />
       
       {/* Header Section */}
-      <View className="p-6">
+      <View className="py-4 px-6">
         <View className="flex-row items-start justify-between mb-4">
           <View className="flex-1">
             {/* Icon and Title */}
@@ -139,7 +139,7 @@ export function ValveCard({
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-slate-900 font-bold text-lg mb-1">
+                <Text className="text-slate-900 font-medium text-lg">
                   {valve.name}
                 </Text>
                 <Text className="text-slate-600 text-sm">
@@ -149,7 +149,7 @@ export function ValveCard({
             </View>
 
             {/* Status and Location */}
-            <View className="flex-row items-center mb-2">
+            <View className="flex-row items-center">
               <View className={cn(
                 'w-2 h-2 rounded-full mr-2',
                 theme.statusColor === 'green' ? 'bg-green-500' : 
@@ -192,15 +192,15 @@ export function ValveCard({
         </View>
 
         {/* Separator */}
-        <View className={cn('h-px mb-4 border-t border-slate-300')} />
+        <View className={cn('h-px mb-3 border-t border-slate-300')} />
 
         {/* Metrics Section */}
         <View className="flex-row justify-between opacity-70">
           {/* Percentage */}
           <View className="flex-1 items-center">
-          <CircleGaugeIcon size={24} color="black" />
+          <CircleGaugeIcon size={20} color="black" />
             <Text className={cn(
-              'text-sm font-medium mt-1',
+              'text-xs font-medium mt-1',
               valve.isOnline ? 'text-black' : 'text-gray-500'
             )}>
               {valve.isOnline ? `${valve.percentage}%` : '0%'}
@@ -209,9 +209,9 @@ export function ValveCard({
 
           {/* Pressure */}
           <View className="flex-1 items-center">
-            <Gauge size={24} color="black" />
+            <Gauge size={20} color="black" />
             <Text className={cn(
-              'text-sm font-medium mt-1',
+              'text-xs font-medium mt-1',
               valve.isOnline && valve.pressure ? 'text-black' : 'text-gray-500'
             )}>
               {valve.isOnline && valve.pressure ? `${valve.pressure} PSI` : '- PSI'}
@@ -220,9 +220,9 @@ export function ValveCard({
 
           {/* Flow Rate */}
           <View className="flex-1 items-center">
-            <Droplets size={24} color="black" />
+            <Droplets size={20} color="black" />
             <Text className={cn(
-              'text-sm font-medium mt-1',
+              'text-xs font-medium mt-1',
               valve.isOnline && valve.flowRate ? 'text-black' : 'text-gray-500'
             )}>
               {valve.isOnline && valve.flowRate ? `${valve.flowRate} L/min` : '- L/min'}
