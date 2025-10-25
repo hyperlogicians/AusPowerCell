@@ -9,6 +9,7 @@ import {
   Pressable,
   TouchableOpacity,
   PanResponder,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "../../components/ui/Card";
@@ -25,8 +26,6 @@ import {
   CirclePower,
 } from "lucide-react-native";
 import { statusStore } from "../../lib/status";
-import { HugeiconsIcon } from "@hugeicons/react-native";
-import { BreastPumpIcon } from "@hugeicons/core-free-icons";
 
 interface SystemStats {
   totalValves: number;
@@ -574,6 +573,29 @@ export default function Dashboard() {
     );
   };
 
+  // Function to get the appropriate valve icon based on status
+  const getValveIcon = (valve: ValveData) => {
+    if (valve.status === 'maintenance' || valve.hasAlert) {
+      return require('../../public/valveerror.png');
+    } else if (valve.status === 'online' && valve.isActive) {
+      return require('../../public/valveon.png');
+    } else if (valve.status === 'online' && !valve.isActive) {
+      return require('../../public/valveoff.png');
+    } else {
+      // Offline - use valveoff with low opacity
+      return require('../../public/valveoff.png');
+    }
+  };
+
+  const getValveIconOpacity = (valve: ValveData) => {
+    if (valve.status === 'maintenance' || valve.hasAlert) {
+      return 1.0; // Full opacity for error valves
+    } else if (valve.status !== 'online') {
+      return 0.3; // Low opacity for offline valves
+    }
+    return 1.0; // Full opacity for online valves
+  };
+
   return (
     <SafeAreaView className="flex-1" edges={["top"]}>
       <View className="flex-1 flex-row">
@@ -675,11 +697,15 @@ export default function Dashboard() {
                 <View className="flex-1">
                   {/* Icon and Title */}
                   <View className="flex-row items-center mb-2">
-                    <View className="rotate-180 mr-3">
-                      <HugeiconsIcon
-                        icon={BreastPumpIcon}
-                        size={55}
-                        color="green"
+                    <View className="mr-3">
+                      <Image 
+                        source={getValveIcon(selectedValve)} 
+                        style={{ 
+                          width: 60, 
+                          height: 60,
+                          opacity: getValveIconOpacity(selectedValve)
+                        }}
+                        resizeMode="contain"
                       />
                     </View>
                     <View className="flex-1">
