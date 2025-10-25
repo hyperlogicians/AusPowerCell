@@ -109,12 +109,8 @@ export default function Settings() {
   ];
 
   const sites = [
-    { id: "1", name: "Main Campus", location: "Building A, Floor 1" },
-    { id: "2", name: "North Wing", location: "Building B, Floor 2" },
-    { id: "3", name: "South Wing", location: "Building C, Floor 1" },
-    { id: "4", name: "East Campus", location: "Building D, Floor 3" },
-    { id: "5", name: "West Campus", location: "Building E, Floor 2" },
-    { id: "6", name: "Research Center", location: "Building F, Floor 1" },
+    { id: "1", name: "Site 1", location: "3 Zones" },
+    { id: "2", name: "Site 2", location: "3 Zones" },
   ];
 
   const getStatusColor = (status: string) => {
@@ -424,7 +420,7 @@ export default function Settings() {
           className="flex-1 bg-black/50 justify-center items-center px-4"
           onPress={() => setIsDropdownOpen(false)}
         >
-          <View className="bg-white rounded-2xl shadow-lg w-full max-w-md">
+          <View className="bg-white rounded-2xl shadow-lg w-full max-w-sm">
             <View className="p-4 border-b border-gray-200">
               <Text className="text-lg font-semibold text-gray-900">Select Site</Text>
             </View>
